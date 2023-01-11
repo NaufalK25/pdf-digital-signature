@@ -1,0 +1,12 @@
+# Node JS
+package-lock.json
+node_modules/
+
+data/
+
+# Log
+logs/
+*.log
+
+# Code Editor
+.vscode/
