@@ -3,6 +3,12 @@ package-lock.json
 node_modules/
 
 data/
+dist/
+
+# Environtment Variables
+.env
+.env.*
+!.env.example
 
 # Log
 logs/

@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "target": "ES2022",
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "importHelpers": true,
+    },
+    "exclude": [
+        "node_modules",
+        "**/*.d.ts",
+        "webpack.*.ts"
+    ]
+}

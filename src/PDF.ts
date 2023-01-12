@@ -1,19 +1,22 @@
-const fs = require('fs');
-const { clearDir, createDir, getDirFromPath } = require('./fs-extend');
-const { createLog } = require('./log-extend');
+import fs from 'fs';
+import { clearDir, createDir, getDirFromPath } from './fs-extend';
+import { createLog } from './log-extend';
 
-module.exports = class PDF {
+export default class PDF {
+    protected filePath: string = '';
+    protected isEncrypted: boolean = false;
+
     constructor(filePath = '', isEncrypted = false) {
         this.filePath = filePath;
         this.isEncrypted = isEncrypted;
     }
 
-    setFilePath(filePath) {
+    setFilePath(filePath: string) {
         this.filePath = filePath;
         return this;
     }
 
-    setIsEncrypted(isEncrypted) {
+    setIsEncrypted(isEncrypted: boolean) {
         this.isEncrypted = isEncrypted;
         return this;
     }
@@ -23,16 +26,16 @@ module.exports = class PDF {
         try {
             createDir(dir);
 
-            const data = fs.readFileSync(this.filePath);
-            const encryptedData = [];
+            const fileBuffer = fs.readFileSync(this.filePath);
+            const encryptedData: number[] = [];
 
-            data.toJSON().data.forEach(byte => {
+            fileBuffer.toJSON().data.forEach(byte => {
                 encryptedData.push(byte + 1);
             });
 
             fs.writeFileSync(dest, Buffer.from(encryptedData));
             this.setIsEncrypted(true);
-        } catch (err) {
+        } catch (err: any) {
             clearDir(dir);
             createLog(err.message);
         }
@@ -45,16 +48,16 @@ module.exports = class PDF {
         try {
             createDir(dir);
 
-            const data = fs.readFileSync(this.filePath);
-            const decryptedData = [];
+            const fileBuffer = fs.readFileSync(this.filePath);
+            const decryptedData: number[] = [];
 
-            data.toJSON().data.forEach(byte => {
+            fileBuffer.toJSON().data.forEach(byte => {
                 decryptedData.push(byte - 1);
             });
 
             fs.writeFileSync(dest, Buffer.from(decryptedData));
             this.setIsEncrypted(false);
-        } catch (err) {
+        } catch (err: any) {
             clearDir(dir);
             createLog(err.message);
         }

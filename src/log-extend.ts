@@ -1,16 +1,16 @@
-const fs = require('fs');
-const { clearDir, createDir } = require('./fs-extend');
+import fs from 'fs';
+import { clearDir, createDir } from './fs-extend';
 
-const createLog = (log, logDir = 'logs', filename = 'error.log') => {
+export const createLog = (log: string, logDir = 'logs', filename = 'error.log') => {
     createDir(logDir);
     fs.appendFileSync(`${logDir}/${filename}`, `${formatLogDateTime()} - ${log}\n`);
 };
 
-const clearLogDir = (logDir = 'logs') => {
+export const clearLogDir = (logDir = 'logs') => {
     clearDir(logDir);
 };
 
-const clearLog = (logDir = 'logs', filename = 'error.log') => {
+export const clearLog = (logDir = 'logs', filename = 'error.log') => {
     fs.unlinkSync(`${logDir}/${filename}`);
     fs.writeFileSync(`${logDir}/${filename}`, '');
 };
@@ -24,10 +24,4 @@ const formatLogDateTime = () => {
     const minute = now.getMinutes().toString().padStart(2, '0');
     const second = now.getSeconds().toString().padStart(2, '0');
     return `[${day} ${month} ${year} ${hour}:${minute}:${second}]`;
-};
-
-module.exports = {
-    clearLog,
-    clearLogDir,
-    createLog
 };

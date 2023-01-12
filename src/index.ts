@@ -1,4 +1,4 @@
-const PDF = require('./PDF');
+import PDF from './PDF';
 
 const encrypt = () => {
     const normalPdf = new PDF('data/example-1.pdf');
