@@ -1,30 +1,43 @@
-import fs from 'fs';
+const fs = require('fs');
 
-export const createDir = (dirPath: string, recursive: boolean = true) => {
+const createDir = (dirPath, recursive = true) => {
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive });
     }
 };
 
-export const splitDirAndFilename = (filePath: string) => {
+const splitDirAndFilename = filePath => {
     const [filename, ...dirArr] = filePath.split('/').reverse();
     const dir = dirArr.reverse().join('/');
 
     return { filename, dir };
 };
 
-export const getDirFromPath = (filePath: string) => {
+const getDirFromPath = filePath => {
     return splitDirAndFilename(filePath).dir;
 };
 
-export const getFilenameFromPath = (filePath: string) => {
+const getFilenameFromPath = filePath => {
     return splitDirAndFilename(filePath).filename;
 };
 
-export const clearDir = (dirPath: string) => {
+const clearDir = dirPath => {
     const files = fs.readdirSync(dirPath);
 
     files.forEach(file => {
         fs.unlinkSync(`${dirPath}/${file}`);
     });
+};
+
+const deleteFile = filePath => {
+    fs.unlinkSync(filePath);
+};
+
+module.exports = {
+    createDir,
+    splitDirAndFilename,
+    getDirFromPath,
+    getFilenameFromPath,
+    clearDir,
+    deleteFile
 };

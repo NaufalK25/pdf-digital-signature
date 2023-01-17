@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Enccryption</title>
+    <link rel="stylesheet" href="public/index.css">
+    <script src="public/index.js" defer></script>
+</head>
+
+<body>
+    <nav>
+        <p>PDF Encryption</p>
+    </nav>
+
+    <div class="uploads_container">
+        <form action="/uploads" method="POST" enctype="multipart/form-data" class="uploads_form">
+            <div class="files_form_group">
+                <label for="files"><%- include('../public/svg/upload.svg') %></label>
+                <input type="file" name="files" id="files" accept=".pdf" multiple required>
+                <textarea title="No file choosen" readonly>No file choosen</textarea>
+            </div>
+            <button type="submit" class="btn">Upload</button>
+        </form>
+    </div>
+
+    <div class="pdf_container">
+        <% if (pdfs) { %>
+        <table class="pdf_table">
+            <% pdfs.forEach(pdf => { %>
+            <tr class="pdf_tbody_row">
+                <td><a href="/uploads/<%= pdf %>" target="_blank"><%= pdf %></a></td>
+                <td>
+                    <form action="/encrypt" method="POST">
+                        <input type="hidden" name="encrypted_file" value="<%= pdf %>">
+                        <button type="submit" class="btn">Encrypt</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="/decrypt" method="POST">
+                        <input type="hidden" name="decrypted_file" value="<%= pdf %>">
+                        <button type="submit" class="btn">Decrypt</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="/delete" method="POST">
+                        <input type="hidden" name="deleted_file" value="<%= pdf %>">
+                        <button type="submit" class="btn">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+        <% } %>
+    </div>
+</body>
+
+</html>
