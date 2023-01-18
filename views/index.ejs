@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Enccryption</title>
+    <title>PDF Encryption</title>
     <link rel="stylesheet" href="public/index.min.css">
     <script src="public/index.min.js" defer></script>
 </head>
@@ -21,7 +21,12 @@
                 <input type="file" name="files" id="files" accept=".pdf" multiple required>
                 <textarea title="No file choosen" readonly>No file choosen</textarea>
             </div>
-            <button type="submit" class="btn" title="Upload">Upload</button>
+            <button type="submit" class="btn" title="Upload">
+                <div class="loading hidden">
+                    <%- include('../public/svg/loading.svg') %>
+                </div>
+                <span>Upload</span>
+            </button>
         </form>
     </div>
 
@@ -42,21 +47,36 @@
                     <% if (!pdf.isEncrypted) { %>
                     <form action="/encrypt" method="POST">
                         <input type="hidden" name="encrypted_file" value="<%= pdf.name %>">
-                        <button type="submit" class="btn" title="Encrypt">Encrypt</button>
+                        <button type="submit" class="btn" title="Encrypt">
+                            <div class="loading hidden">
+                                <%- include('../public/svg/loading.svg') %>
+                            </div>
+                            <span>Encrypt</span>
+                        </button>
                     </form>
                     <% } %>
 
                     <% if (pdf.isEncrypted) { %>
                     <form action="/decrypt" method="POST">
                         <input type="hidden" name="decrypted_file" value="<%= pdf.name %>">
-                        <button type="submit" class="btn" title="Decrypt">Decrypt</button>
+                        <button type="submit" class="btn" title="Decrypt">
+                            <div class="loading hidden">
+                                <%- include('../public/svg/loading.svg') %>
+                            </div>
+                            <span>Decrypt</span>
+                        </button>
                     </form>
                     <% } %>
                 </td>
                 <td>
                     <form action="/delete" method="POST">
                         <input type="hidden" name="deleted_file" value="<%= pdf.name %>">
-                        <button type="submit" class="btn" title="Delete">Delete</button>
+                        <button type="submit" class="btn" title="Delete">
+                            <div class="loading hidden">
+                                <%- include('../public/svg/loading.svg') %>
+                            </div>
+                            <span>Delete</span>
+                        </button>
                     </form>
                 </td>
             </tr>
