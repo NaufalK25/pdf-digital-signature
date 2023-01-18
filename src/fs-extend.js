@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const createDir = (dirPath, recursive = true) => {
     if (!fs.existsSync(dirPath)) {
@@ -7,10 +8,7 @@ const createDir = (dirPath, recursive = true) => {
 };
 
 const splitDirAndFilename = filePath => {
-    const [filename, ...dirArr] = filePath.split('/').reverse();
-    const dir = dirArr.reverse().join('/');
-
-    return { filename, dir };
+    return path.parse(filePath);
 };
 
 const getDirFromPath = filePath => {
@@ -18,7 +16,7 @@ const getDirFromPath = filePath => {
 };
 
 const getFilenameFromPath = filePath => {
-    return splitDirAndFilename(filePath).filename;
+    return splitDirAndFilename(filePath).base;
 };
 
 const clearDir = dirPath => {

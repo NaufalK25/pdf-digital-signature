@@ -160,3 +160,23 @@ label[for='files'] {
     transition: background-color 0.3s ease-in-out;
     font-size: 16px;
 }
+
+.pdf_col_name {
+    width: 70%;
+}
+
+.pdf_col {
+    width: 15%;
+}
+
+.pdf_name_container {
+    display: flex;
+    flex-direction: column;
+    gap: 0 1rem;
+}
+
+.pdf_name_note {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--pewter-blue);
+}

@@ -1,24 +1,13 @@
 const fs = require('fs');
 const AES = require('./AES');
-const { clearDir, createDir, getDirFromPath } = require('./fs-extend');
+const { clearDir, createDir, getDirFromPath, deleteFile } = require('./fs-extend');
 
 module.exports = class PDF {
-    constructor(filePath = '', isEncrypted = false) {
+    constructor(filePath = '') {
         this.filePath = filePath;
-        this.isEncrypted = isEncrypted;
     }
 
-    setFilePath(filePath) {
-        this.filePath = filePath;
-        return this;
-    }
-
-    setIsEncrypted(isEncrypted) {
-        this.isEncrypted = isEncrypted;
-        return this;
-    }
-
-    encrypt(dest = 'data/encrypt/encrypted.pdf') {
+    encrypt(dest) {
         const dir = getDirFromPath(dest);
         try {
             createDir(dir);
@@ -27,12 +16,12 @@ module.exports = class PDF {
             const encryptedData = [];
 
             fileBuffer.toJSON().data.forEach(byte => {
-                // encryptedData.push(byte + 1);
                 encryptedData.push(AES.encrypt(byte, AES.key128, 'CTR'));
             });
 
             fs.writeFileSync(dest, Buffer.from(encryptedData));
-            this.setIsEncrypted(true);
+
+            deleteFile(this.filePath);
         } catch (err) {
             clearDir(dir);
         }
@@ -40,7 +29,7 @@ module.exports = class PDF {
         return this;
     }
 
-    decrypt(dest = 'data/decrypt/decrypted.pdf') {
+    decrypt(dest) {
         const dir = getDirFromPath(dest);
         try {
             createDir(dir);
@@ -49,12 +38,12 @@ module.exports = class PDF {
             const decryptedData = [];
 
             fileBuffer.toJSON().data.forEach(byte => {
-                // decryptedData.push(byte - 1);
                 decryptedData.push(AES.decrypt(byte, AES.key128, 'CTR'));
             });
 
             fs.writeFileSync(dest, Buffer.from(decryptedData));
-            this.setIsEncrypted(false);
+
+            deleteFile(this.filePath);
         } catch (err) {
             clearDir(dir);
         }
@@ -62,10 +51,7 @@ module.exports = class PDF {
         return this;
     }
 
-    toString() {
-        return {
-            filePath: this.filePath,
-            isEncrypted: this.isEncrypted
-        };
-    }
-}
+    toString = () => {
+        return this.filePath;
+    };
+};
