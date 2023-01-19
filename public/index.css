@@ -6,6 +6,7 @@
     --oxford-blue: #0b2545;
     --prussian-blue: #13315c;
     --indigo-dye: #134074;
+    --font: 'Nunito Sans', sans-serif;
 }
 
 * {
@@ -15,7 +16,7 @@
 }
 
 body {
-    font-family: 'Nunito Sans', sans-serif;
+    font-family: var(--font);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -83,8 +84,8 @@ a:is(:hover, :focus) {
     color: #00132c;
     width: 120px;
     height: 96px;
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 16px;
+    font-family: var(--font);
+    font-size: 18px;
     font-weight: 700;
     line-height: 24px;
     padding: 16px 23px;
@@ -142,7 +143,7 @@ label[for='files'] {
     padding: 10px 20px;
     color: var(--mint-cream);
     fill: var(--oxford-blue);
-    font-family: 'Nunito Sans', sans-serif;
+    font-family: var(--font);
     font-size: 16px;
     font-weight: 700;
     line-height: 24px;

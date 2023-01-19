@@ -30,8 +30,18 @@
         </form>
     </div>
 
+
+    <% if (pdfs.length > 0) { %>
+    <form action="/delete-all" method="POST">
+        <button type="submit" class="btn" title="Delete All">
+            <div class="loading hidden">
+                <%- include('../public/svg/loading.svg') %>
+            </div>
+            <span>Delete All</span>
+        </button>
+    </form>
+
     <div class="pdf_container">
-        <% if (pdfs) { %>
         <table class="pdf_table">
             <% pdfs.forEach(pdf => { %>
             <tr class="pdf_tbody_row">
@@ -82,8 +92,8 @@
             </tr>
             <% }) %>
         </table>
-        <% } %>
     </div>
+    <% } %>
 </body>
 
 </html>

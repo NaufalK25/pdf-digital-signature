@@ -69,6 +69,14 @@ app.post('/delete', (req, res) => {
     res.redirect('/');
 });
 
+app.post('/delete-all', (req, res) => {
+    const uploadsDirContent = fs.readdirSync(uploadsDir);
+
+    uploadsDirContent.filter(file => path.parse(file).ext === '.pdf').forEach(file => deleteFile(path.join(uploadsDir, file)));
+
+    res.redirect('/');
+});
+
 app.post('/encrypt', (req, res) => {
     let file = req.body.encrypted_file;
 
