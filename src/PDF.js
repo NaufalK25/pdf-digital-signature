@@ -23,7 +23,7 @@ module.exports = class PDF {
 
             deleteFile(this.filePath);
         } catch (err) {
-            clearDir(dir);
+            clearDir(dir, ['.gitkeep']);
         }
 
         return this;
@@ -45,7 +45,7 @@ module.exports = class PDF {
 
             deleteFile(this.filePath);
         } catch (err) {
-            clearDir(dir);
+            clearDir(dir, ['.gitkeep']);
         }
 
         return this;

@@ -19,11 +19,15 @@ const getFilenameFromPath = filePath => {
     return splitDirAndFilename(filePath).base;
 };
 
-const clearDir = dirPath => {
+const clearDir = (dirPath, except = []) => {
     const files = fs.readdirSync(dirPath);
 
     files.forEach(file => {
-        fs.unlinkSync(`${dirPath}/${file}`);
+        if (except.includes(file)) {
+            return;
+        }
+
+        fs.unlinkSync(path.join(dirPath, file));
     });
 };
 
