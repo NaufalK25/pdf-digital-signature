@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const createDir = (dirPath, recursive = true) => {
+const createDir = dirPath => {
     if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive });
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 };
 
@@ -27,7 +27,7 @@ const clearDir = (dirPath, except = []) => {
             return;
         }
 
-        fs.unlinkSync(path.join(dirPath, file));
+        deleteFile(path.join(dirPath, file));
     });
 };
 
