@@ -13,6 +13,6 @@ const uploadFilesMiddleware = multer({
             cb(null, `${Date.now()}-${originalname}`);
         }
     })
-}).array('files');
+});
 
 module.exports = uploadFilesMiddleware;
