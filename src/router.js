@@ -1,7 +1,6 @@
 const express = require('express');
-const multer = require('multer');
-const uploadFilesMiddleware = require('./middleware');
 const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('./controller');
+const { uploadFilesMiddleware } = require('./uploadFilesMiddleware');
 
 const router = express.Router();
 
