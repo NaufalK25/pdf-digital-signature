@@ -17,11 +17,11 @@ const storage = multer.diskStorage({
     filename
 });
 
-const uploadFilesMiddleware = multer({ storage });
+const uploadPDFSMiddleware = multer({ storage });
 
 module.exports = {
     destination,
     filename,
     storage,
-    uploadFilesMiddleware
+    uploadPDFSMiddleware
 };

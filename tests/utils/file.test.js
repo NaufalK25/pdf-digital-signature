@@ -1,7 +1,7 @@
 const fs = require('fs');
-const { clearDir, createDir, deleteFile, getDirFromPath, getFilenameFromPath, splitDirAndFilename } = require('../src/fs-extend');
+const { clearDir, createDir, deleteFile, getDirFromPath, getFilenameFromPath, splitDirAndFilename } = require('../../utils/file');
 
-const testDir = './tests';
+const testDir = `${__dirname}/..`;
 const uploadsDir = `${testDir}/uploads`;
 
 afterAll(() => {

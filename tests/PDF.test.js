@@ -1,14 +1,14 @@
 const fs = require('fs');
-const PDF = require('../src/PDF');
+const PDF = require('../PDF');
 
-jest.mock('../src/constant', () => {
+jest.mock('../utils/constant', () => {
     return {
-        ...jest.requireActual('../src/constant'),
+        ...jest.requireActual('../utils/constant'),
         uploadsDir: `${__dirname}/../tests/resources`
     };
 });
 
-const { uploadsDir } = require('../src/constant');
+const { uploadsDir } = require('../utils/constant');
 
 let pdf,
     pdfFile = `${uploadsDir}/pdf-test.pdf`,

@@ -87,8 +87,8 @@ module.exports = class AES {
     }
 
     static encryptCBC(byte, key) {
-        const aesCCbc = new aesjs.ModeOfOperation.cbc(key, AES.iv);
-        const encryptedBytes = aesCCbc.encrypt([byte]);
+        const aesCbc = new aesjs.ModeOfOperation.cbc(key, AES.iv);
+        const encryptedBytes = aesCbc.encrypt([byte]);
         return encryptedBytes[0];
     }
 
@@ -118,8 +118,8 @@ module.exports = class AES {
     }
 
     static decryptCBC(byte, key) {
-        const aesCCbc = new aesjs.ModeOfOperation.cbc(key, AES.iv);
-        const decryptedBytes = aesCCbc.decrypt([byte]);
+        const aesCbc = new aesjs.ModeOfOperation.cbc(key, AES.iv);
+        const decryptedBytes = aesCbc.decrypt([byte]);
         return decryptedBytes[0];
     }
 

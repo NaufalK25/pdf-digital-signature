@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const PDF = require('./PDF');
-const { uploadsDir } = require('./constant');
-const { deleteFile } = require('./fs-extend');
+const { uploadsDir } = require('./utils/constant');
+const { deleteFile } = require('./utils/file');
 
 const getRoot = (req, res) => {
     const uploadsDirContent = fs.readdirSync(uploadsDir);

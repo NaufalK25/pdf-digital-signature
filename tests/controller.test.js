@@ -1,16 +1,16 @@
 const fs = require('fs');
 const path = require('path');
-const PDF = require('../src/PDF');
+const PDF = require('../PDF');
 
-jest.mock('../src/constant', () => {
+jest.mock('../utils/constant', () => {
     return {
-        ...jest.requireActual('../src/constant'),
+        ...jest.requireActual('../utils/constant'),
         uploadsDir: `${__dirname}/../tests/resources`
     };
 });
 
-const { uploadsDir } = require('../src/constant');
-const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('../src/controller');
+const { uploadsDir } = require('../utils/constant');
+const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('../controller');
 
 const mockRequest = ({ body } = {}) => ({ body });
 const mockResponse = () => {

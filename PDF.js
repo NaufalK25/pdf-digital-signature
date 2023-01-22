@@ -1,6 +1,6 @@
 const fs = require('fs');
-const AES = require('./AES');
-const { clearDir, createDir, deleteFile, getDirFromPath } = require('./fs-extend');
+const AES = require('./crypto/oldAES');
+const { clearDir, createDir, deleteFile, getDirFromPath } = require('./utils/file');
 
 module.exports = class PDF {
     constructor(filePath = '') {

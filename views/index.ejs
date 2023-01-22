@@ -36,7 +36,7 @@
 
 
     <% if (pdfs.length > 0) { %>
-    <form action="/delete-all" method="POST">
+    <form action="/delete-all?_method=DELETE" method="POST">
         <button type="submit" class="btn" title="Delete All">
             <div class="loading hidden">
                 <%- include('../public/svg/loading.svg') %>
@@ -83,7 +83,7 @@
                     <% } %>
                 </td>
                 <td>
-                    <form action="/delete" method="POST">
+                    <form action="/delete?_method=DELETE" method="POST">
                         <input type="hidden" name="deleted_file" value="<%= pdf.name %>">
                         <button type="submit" class="btn" title="Delete">
                             <div class="loading hidden">

@@ -2,10 +2,10 @@
     "name": "pdf-encryption",
     "version": "1.0.0",
     "description": "",
-    "main": "src/index.js",
+    "main": "index.js",
     "scripts": {
-        "start": "node src/index.js",
-        "dev": "npx nodemon src/index.js",
+        "start": "node index.js",
+        "dev": "npx nodemon index.js",
         "test": "npx jest"
     },
     "keywords": [],
@@ -17,6 +17,8 @@
         "ejs": "^3.1.8",
         "express": "^4.18.2",
         "express-ejs-layouts": "^2.5.1",
+        "method-override": "^3.0.0",
+        "morgan": "^1.10.0",
         "multer": "^1.4.5-lts.1",
         "tslib": "^2.4.1"
     },
