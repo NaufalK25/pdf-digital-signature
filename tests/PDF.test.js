@@ -19,6 +19,12 @@ beforeAll(() => {
     pdf = new PDF(pdfFile);
 });
 
+afterAll(() => {
+    if (!fs.existsSync(`${dest}/.gitkeep`)) {
+        fs.writeFileSync(`${dest}/.gitkeep`, '');
+    }
+});
+
 describe('PDF Class', () => {
     it('should return PDF instance', () => {
         expect(pdf).toBeInstanceOf(PDF);
@@ -61,7 +67,7 @@ describe('PDF Error', () => {
         pdf.encrypt(newDest);
 
         const fileCount = fs.readdirSync(dest).length;
-        expect(fileCount).toEqual(0);
+        expect(fileCount).toEqual(1);
     });
 
     it('decrypt method can throw error', () => {
@@ -69,6 +75,6 @@ describe('PDF Error', () => {
         pdf.decrypt(newDest);
 
         const fileCount = fs.readdirSync(dest).length;
-        expect(fileCount).toEqual(0);
+        expect(fileCount).toEqual(1);
     });
 });

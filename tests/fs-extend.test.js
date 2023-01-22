@@ -2,42 +2,46 @@ const fs = require('fs');
 const { clearDir, createDir, deleteFile, getDirFromPath, getFilenameFromPath, splitDirAndFilename } = require('../src/fs-extend');
 
 const testDir = './tests';
-const playgroundDir = `${testDir}/uploads`;
+const uploadsDir = `${testDir}/uploads`;
 
 afterAll(() => {
-    clearDir(playgroundDir);
+    if (!fs.existsSync(`${uploadsDir}/.gitkeep`)) {
+        fs.writeFileSync(`${uploadsDir}/.gitkeep`, '');
+    }
+
+    clearDir(uploadsDir, ['.gitkeep']);
 });
 
 describe('clearDir function', () => {
     beforeEach(() => {
-        fs.writeFileSync(`${playgroundDir}/file1.txt`, 'file1');
-        fs.writeFileSync(`${playgroundDir}/file2.txt`, 'file2');
+        fs.writeFileSync(`${uploadsDir}/file1.txt`, 'file1');
+        fs.writeFileSync(`${uploadsDir}/file2.txt`, 'file2');
     });
 
     afterEach(() => {
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeFalsy()
-        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBeFalsy()
+        expect(fs.existsSync(`${uploadsDir}/file1.txt`)).toBeFalsy();
+        expect(fs.existsSync(`${uploadsDir}/file2.txt`)).toBeFalsy();
     });
 
     it('should clear directory', () => {
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeTruthy();
-        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/file1.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/file2.txt`)).toBeTruthy();
 
-        clearDir(playgroundDir);
+        clearDir(uploadsDir);
     });
 
     it('should clear directory except specific file(s)', () => {
-        fs.writeFileSync(`${playgroundDir}/.gitkeep`, '');
+        fs.writeFileSync(`${uploadsDir}/.gitkeep`, '');
 
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeTruthy();
-        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBeTruthy();
-        expect(fs.existsSync(`${playgroundDir}/.gitkeep`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/file1.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/file2.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/.gitkeep`)).toBeTruthy();
 
-        clearDir(playgroundDir, ['.gitkeep']);
+        clearDir(uploadsDir, ['.gitkeep']);
 
-        expect(fs.existsSync(`${playgroundDir}/.gitkeep`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/.gitkeep`)).toBeTruthy();
 
-        deleteFile(`${playgroundDir}/.gitkeep`);
+        deleteFile(`${uploadsDir}/.gitkeep`);
     });
 });
 
@@ -55,28 +59,28 @@ describe('createDir function', () => {
 
 describe('deleteFile function', () => {
     it('should delete file', () => {
-        fs.writeFileSync(`${playgroundDir}/file1.txt`, 'file1');
+        fs.writeFileSync(`${uploadsDir}/file1.txt`, 'file1');
 
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${uploadsDir}/file1.txt`)).toBeTruthy();
 
-        deleteFile(`${playgroundDir}/file1.txt`);
+        deleteFile(`${uploadsDir}/file1.txt`);
 
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeFalsy();
+        expect(fs.existsSync(`${uploadsDir}/file1.txt`)).toBeFalsy();
     });
 });
 
 describe('getDirFromPath function', () => {
     it('should get directory from path', () => {
-        const filePath = `${playgroundDir}/file1.txt`;
+        const filePath = `${uploadsDir}/file1.txt`;
         const dir = getDirFromPath(filePath);
 
-        expect(dir).toBe(playgroundDir);
+        expect(dir).toBe(uploadsDir);
     });
 });
 
 describe('getFilenameFromPath function', () => {
     it('should get filename from path', () => {
-        const filePath = `${playgroundDir}/file1.txt`;
+        const filePath = `${uploadsDir}/file1.txt`;
         const filename = getFilenameFromPath(filePath);
 
         expect(filename).toBe('file1.txt');
@@ -85,10 +89,10 @@ describe('getFilenameFromPath function', () => {
 
 describe('splitDirAndFilename function', () => {
     it('should split directory and filename', () => {
-        const filePath = `${playgroundDir}/file1.txt`;
+        const filePath = `${uploadsDir}/file1.txt`;
         const { dir, base } = splitDirAndFilename(filePath);
 
-        expect(dir).toBe(playgroundDir);
+        expect(dir).toBe(uploadsDir);
         expect(base).toBe('file1.txt');
     });
 });

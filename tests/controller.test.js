@@ -9,6 +9,7 @@ jest.mock('../src/constant', () => {
     };
 });
 
+const { uploadsDir } = require('../src/constant');
 const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('../src/controller');
 
 const mockRequest = ({ body } = {}) => ({ body });
@@ -26,6 +27,12 @@ beforeAll(() => {
     fs.readdirSync = jest.fn().mockReturnValue(['test.pdf', 'test2.pdf']);
     path.parse = jest.fn().mockReturnValue({ ext: '.pdf' });
     fs.unlinkSync = jest.fn();
+});
+
+afterAll(() => {
+    if (!fs.existsSync(`${uploadsDir}/../uploads/.gitkeep`)) {
+        fs.writeFileSync(`${uploadsDir}/../uploads/.gitkeep`, '');
+    }
 });
 
 describe('GET /', () => {
