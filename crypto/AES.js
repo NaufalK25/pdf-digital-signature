@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const { asciiToHex, hexToBytes } = require('./str-extend');
+const { asciiToHex, hexToBytes } = require('../utils/stringConverter');
 dotenv.config();
 
 /**
