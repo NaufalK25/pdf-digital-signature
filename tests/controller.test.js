@@ -5,7 +5,7 @@ const PDF = require('../src/PDF');
 jest.mock('../src/constant', () => {
     return {
         ...jest.requireActual('../src/constant'),
-        uploadsDir: `${__dirname}\\..\\tests\\resources`
+        uploadsDir: `${__dirname}/../tests/resources`
     };
 });
 

@@ -2,14 +2,10 @@ const fs = require('fs');
 const { clearDir, createDir, deleteFile, getDirFromPath, getFilenameFromPath, splitDirAndFilename } = require('../src/fs-extend');
 
 const testDir = './tests';
-const playgroundDir = `${testDir}/playground`;
-
-beforeAll(() => {
-    createDir(playgroundDir);
-});
+const playgroundDir = `${testDir}/uploads`;
 
 afterAll(() => {
-    fs.rmSync(playgroundDir, { recursive: true });
+    clearDir(playgroundDir);
 });
 
 describe('clearDir function', () => {
@@ -19,13 +15,13 @@ describe('clearDir function', () => {
     });
 
     afterEach(() => {
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBe(false);
-        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBe(false);
+        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeFalsy()
+        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBeFalsy()
     });
 
     it('should clear directory', () => {
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBe(true);
-        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBe(true);
+        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBeTruthy();
 
         clearDir(playgroundDir);
     });
@@ -33,13 +29,13 @@ describe('clearDir function', () => {
     it('should clear directory except specific file(s)', () => {
         fs.writeFileSync(`${playgroundDir}/.gitkeep`, '');
 
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBe(true);
-        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBe(true);
-        expect(fs.existsSync(`${playgroundDir}/.gitkeep`)).toBe(true);
+        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${playgroundDir}/file2.txt`)).toBeTruthy();
+        expect(fs.existsSync(`${playgroundDir}/.gitkeep`)).toBeTruthy();
 
         clearDir(playgroundDir, ['.gitkeep']);
 
-        expect(fs.existsSync(`${playgroundDir}/.gitkeep`)).toBe(true);
+        expect(fs.existsSync(`${playgroundDir}/.gitkeep`)).toBeTruthy();
 
         deleteFile(`${playgroundDir}/.gitkeep`);
     });
@@ -51,7 +47,7 @@ describe('createDir function', () => {
 
         createDir(tempDir);
 
-        expect(fs.existsSync(tempDir)).toBe(true);
+        expect(fs.existsSync(tempDir)).toBeTruthy();
 
         fs.rmdirSync(tempDir);
     });
@@ -61,11 +57,11 @@ describe('deleteFile function', () => {
     it('should delete file', () => {
         fs.writeFileSync(`${playgroundDir}/file1.txt`, 'file1');
 
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBe(true);
+        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeTruthy();
 
         deleteFile(`${playgroundDir}/file1.txt`);
 
-        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBe(false);
+        expect(fs.existsSync(`${playgroundDir}/file1.txt`)).toBeFalsy();
     });
 });
 

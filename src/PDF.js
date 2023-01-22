@@ -1,6 +1,6 @@
 const fs = require('fs');
 const AES = require('./AES');
-const { clearDir, createDir, getDirFromPath, deleteFile } = require('./fs-extend');
+const { clearDir, createDir, deleteFile, getDirFromPath } = require('./fs-extend');
 
 module.exports = class PDF {
     constructor(filePath = '') {
@@ -50,8 +50,4 @@ module.exports = class PDF {
 
         return this;
     }
-
-    toString = () => {
-        return this.filePath;
-    };
 };
