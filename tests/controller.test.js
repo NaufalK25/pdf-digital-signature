@@ -30,8 +30,8 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-    if (!fs.existsSync(`${uploadsDir}/../uploads/.gitkeep`)) {
-        fs.writeFileSync(`${uploadsDir}/../uploads/.gitkeep`, '');
+    if (!fs.existsSync(path.join(uploadsDir, '..', 'uploads', '.gitkeep'))) {
+        fs.writeFileSync(path.join(uploadsDir, '..', 'uploads', '.gitkeep'), '');
     }
 });
 

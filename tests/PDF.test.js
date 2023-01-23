@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const PDF = require('../PDF');
 
 jest.mock('../utils/constant', () => {
@@ -11,17 +12,17 @@ jest.mock('../utils/constant', () => {
 const { uploadsDir } = require('../utils/constant');
 
 let pdf,
-    pdfFile = `${uploadsDir}/pdf-test.pdf`,
-    dest = `${uploadsDir}/../uploads`;
+    pdfFile = path.join(uploadsDir, 'pdf-test.pdf'),
+    dest = path.join(uploadsDir, '..', 'uploads');
 
 beforeAll(() => {
-    fs.copyFileSync(`${uploadsDir}/test.pdf`, pdfFile);
+    fs.copyFileSync(path.join(uploadsDir, 'test.pdf'), pdfFile);
     pdf = new PDF(pdfFile);
 });
 
 afterAll(() => {
-    if (!fs.existsSync(`${dest}/.gitkeep`)) {
-        fs.writeFileSync(`${dest}/.gitkeep`, '');
+    if (!fs.existsSync(path.join(dest, '.gitkeep'))) {
+        fs.writeFileSync(path.join(dest, '.gitkeep'), '');
     }
 });
 
@@ -40,15 +41,15 @@ describe('PDF Class', () => {
 
 describe('PDF Object', () => {
     it('encrypt method should be working as expected', () => {
-        const newDest = `${dest}/encrypted-pdf-test.pdf`;
+        const newDest = path.join(dest, 'encrypted-pdf-test.pdf');
         pdf.encrypt(newDest);
 
         expect(fs.existsSync(newDest)).toBeTruthy();
     });
 
     it('decrypt method should be working as expected', () => {
-        const newDest = `${dest}/decrypted-pdf-test.pdf`;
-        pdf = new PDF(`${dest}/encrypted-pdf-test.pdf`);
+        const newDest = path.join(dest, 'decrypted-pdf-test.pdf');
+        pdf = new PDF(path.join(dest, 'encrypted-pdf-test.pdf'));
         pdf.decrypt(newDest);
 
         expect(fs.existsSync(newDest)).toBeTruthy();
@@ -63,7 +64,7 @@ describe('PDF Error', () => {
     });
 
     it('encrypt method can throw error', () => {
-        const newDest = `${dest}/decrypted-pdf-test.pdf`;
+        const newDest = path.join(dest, 'decrypted-pdf-test.pdf');
         pdf.encrypt(newDest);
 
         const fileCount = fs.readdirSync(dest).length;
@@ -71,7 +72,7 @@ describe('PDF Error', () => {
     });
 
     it('decrypt method can throw error', () => {
-        const newDest = `${dest}/decrypted-pdf-test.pdf`;
+        const newDest = path.join(dest, 'decrypted-pdf-test.pdf');
         pdf.decrypt(newDest);
 
         const fileCount = fs.readdirSync(dest).length;
