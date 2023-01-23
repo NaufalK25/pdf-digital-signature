@@ -3,7 +3,6 @@ const path = require('path');
 const PDF = require('../utils/PDF');
 const { deleteFromCloud, getFilesFromCloud, uploadToCloud } = require('../utils/cloud');
 const { uploadsDir } = require('../utils/constant');
-const { deleteFile } = require('../utils/file');
 
 const getRoot = async (req, res) => {
     const pdfs = await getFilesFromCloud();
@@ -58,7 +57,7 @@ const deletePDF = async (req, res) => {
     const file = req.body.deleted_file;
 
     await deleteFromCloud(path.join(uploadsDir, file));
-    deleteFile(path.join(uploadsDir, file));
+    fs.unlinkSync(path.join(uploadsDir, file));
 
     res.redirect('/');
 };
@@ -70,7 +69,7 @@ const deleteAllPDF = async (req, res) => {
 
     const uploadsDirContent = fs.readdirSync(uploadsDir);
 
-    uploadsDirContent.filter(file => path.parse(file).ext === '.pdf').forEach(file => deleteFile(path.join(uploadsDir, file)));
+    uploadsDirContent.filter(file => path.parse(file).ext === '.pdf').forEach(file => fs.unlinkSync(path.join(uploadsDir, file)));
 
     res.redirect('/');
 };

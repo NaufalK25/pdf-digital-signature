@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const AES = require('../crypto/oldAES');
 const { deleteFromCloud, uploadToCloud } = require('./cloud');
-const { clearDir, createDir, deleteFile } = require('./file');
+const { clearDir, createDir } = require('./file');
 
 module.exports = class PDF {
     constructor(filePath = '') {
@@ -25,7 +25,7 @@ module.exports = class PDF {
             await uploadToCloud(dest, path.basename(dest));
 
             await deleteFromCloud(this.filePath);
-            deleteFile(this.filePath);
+            fs.unlinkSync(this.filePath);
         } catch (err) {
             clearDir(dir, ['.gitkeep']);
         }
@@ -49,7 +49,7 @@ module.exports = class PDF {
             await uploadToCloud(dest, path.basename(dest));
 
             await deleteFromCloud(this.filePath);
-            deleteFile(this.filePath);
+            fs.unlinkSync(this.filePath);
         } catch (err) {
             clearDir(dir, ['.gitkeep']);
         }

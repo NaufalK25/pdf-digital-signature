@@ -15,16 +15,11 @@ const clearDir = (dirPath, except = []) => {
             return;
         }
 
-        deleteFile(path.join(dirPath, file));
+        fs.unlinkSync(path.join(dirPath, file));
     });
-};
-
-const deleteFile = filePath => {
-    fs.unlinkSync(filePath);
 };
 
 module.exports = {
     createDir,
     clearDir,
-    deleteFile
 };
