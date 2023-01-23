@@ -7,18 +7,6 @@ const createDir = dirPath => {
     }
 };
 
-const splitDirAndFilename = filePath => {
-    return path.parse(filePath);
-};
-
-const getDirFromPath = filePath => {
-    return splitDirAndFilename(filePath).dir;
-};
-
-const getFilenameFromPath = filePath => {
-    return splitDirAndFilename(filePath).base;
-};
-
 const clearDir = (dirPath, except = []) => {
     const files = fs.readdirSync(dirPath);
 
@@ -37,9 +25,6 @@ const deleteFile = filePath => {
 
 module.exports = {
     createDir,
-    splitDirAndFilename,
-    getDirFromPath,
-    getFilenameFromPath,
     clearDir,
     deleteFile
 };

@@ -1,7 +1,7 @@
 const { destination, filename } = require('../../middlewares/uploadPDFSMiddleware');
 
 describe('destination function', () => {
-    it('should should be working as expected', () => {
+    it('should be working as expected', () => {
         const req = {};
         const file = { mimetype: 'application/pdf' };
         const cb = jest.fn();
@@ -23,7 +23,7 @@ describe('destination function', () => {
 });
 
 describe('filename function', () => {
-    it('should should be working as expected', () => {
+    it('should be working as expected', () => {
         Date.now = jest.fn(() => 123456789);
 
         const req = {};

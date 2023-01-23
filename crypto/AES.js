@@ -1,6 +1,5 @@
-const dotenv = require('dotenv');
+require('dotenv').config();
 const { asciiToHex, hexToBytes } = require('../utils/stringConverter');
-dotenv.config();
 
 /**
  * AES 128-bit

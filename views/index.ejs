@@ -51,7 +51,7 @@
             <tr class="pdf_tbody_row">
                 <td class="pdf_col_name">
                     <div <%= pdf.isEncrypted ? 'class=pdf_name_container' : '' %>>
-                        <a href="/uploads/<%= pdf.name %>" target="_blank" title="<%= pdf.name %>"><%= pdf.name %></a>
+                        <a href="<%= pdf.url %>" target="_blank" rel="noopener noreferrer" title="<%= pdf.name %>"><%= pdf.name %></a>
                         <% if (pdf.isEncrypted) { %>
                         <span class="pdf_name_note">*PDF is Encrypted</span>
                         <% } %>

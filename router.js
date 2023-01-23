@@ -1,5 +1,5 @@
 const express = require('express');
-const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('./controller');
+const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('./controllers/pdf');
 const { uploadPDFSMiddleware } = require('./middlewares/uploadPDFSMiddleware');
 
 const router = express.Router();

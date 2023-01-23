@@ -1,14 +1,16 @@
 const fs = require('fs');
-const AES = require('./crypto/oldAES');
-const { clearDir, createDir, deleteFile, getDirFromPath } = require('./utils/file');
+const path = require('path');
+const AES = require('../crypto/oldAES');
+const { deleteFromCloud, uploadToCloud } = require('./cloud');
+const { clearDir, createDir, deleteFile } = require('./file');
 
 module.exports = class PDF {
     constructor(filePath = '') {
         this.filePath = filePath;
     }
 
-    encrypt(dest) {
-        const dir = getDirFromPath(dest);
+    async encrypt(dest) {
+        const dir = path.dirname(dest);
         try {
             createDir(dir);
 
@@ -20,7 +22,9 @@ module.exports = class PDF {
             });
 
             fs.writeFileSync(dest, Buffer.from(encryptedData));
+            await uploadToCloud(dest, path.basename(dest));
 
+            await deleteFromCloud(this.filePath);
             deleteFile(this.filePath);
         } catch (err) {
             clearDir(dir, ['.gitkeep']);
@@ -29,8 +33,8 @@ module.exports = class PDF {
         return this;
     }
 
-    decrypt(dest) {
-        const dir = getDirFromPath(dest);
+    async decrypt(dest) {
+        const dir = path.dirname(dest);
         try {
             createDir(dir);
 
@@ -42,7 +46,9 @@ module.exports = class PDF {
             });
 
             fs.writeFileSync(dest, Buffer.from(decryptedData));
+            await uploadToCloud(dest, path.basename(dest));
 
+            await deleteFromCloud(this.filePath);
             deleteFile(this.filePath);
         } catch (err) {
             clearDir(dir, ['.gitkeep']);
