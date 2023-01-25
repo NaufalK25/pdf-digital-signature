@@ -8,7 +8,7 @@ const getRoot = async (req, res) => {
     const pdfs = await getFilesFromCloud();
 
     pdfs.sort((a, b) => (a.name > b.name ? -1 : 1)).forEach(pdf => {
-        pdf.isDecrypted = false;
+        pdf.isEncrypted = false;
         if (pdf.name.startsWith('encrypted-')) {
             pdf.isEncrypted = true;
         }

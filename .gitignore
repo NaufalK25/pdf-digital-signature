@@ -15,3 +15,5 @@ coverage/
 # Misc
 *.pdf
 !tests/**/*.pdf
+public/**/*.{css,js}
+!public/**/*.min.{css,js}
