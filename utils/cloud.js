@@ -31,22 +31,46 @@ const getFilesFromCloud = async () => {
 
 const uploadToCloud = async (filePath, filename) => {
     const file = fs.readFileSync(filePath);
+    const result = {
+        success: true,
+        name: filename,
+        url: ''
+    };
 
     try {
-        await dbx.filesUpload({ path: `/${filename}`, contents: file });
+        const response = await dbx.filesUpload({ path: `/${filename}`, contents: file });
+
+        if (response.result) {
+            const sharedLinkRes = await dbx.sharingCreateSharedLinkWithSettings({ path: response.result.path_lower });
+            result.url = sharedLinkRes.result.url;
+        }
     } catch (error) {
-        console.error(error);
+        result.success = false;
     }
+
+    return result;
 };
 
 const deleteFromCloud = async filePath => {
     const filename = path.basename(filePath);
+    const result = {
+        success: true,
+        name: filename,
+        url: ''
+    };
 
     try {
-        await dbx.filesDeleteV2({ path: `/${filename}` });
+        const response = await dbx.filesDeleteV2({ path: `/${filename}` });
+
+        if (response.result) {
+            const sharedLinkRes = await dbx.sharingCreateSharedLinkWithSettings({ path: response.result.path_lower });
+            result.url = sharedLinkRes.result.url;
+        }
     } catch (error) {
-        console.error(error);
+        result.success = false;
     }
+
+    return result;
 };
 
 module.exports = {
