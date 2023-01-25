@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const AES = require('../crypto/oldAES');
+const AES = require('./crypto/oldAES');
 const { deleteFromCloud, uploadToCloud } = require('./cloud');
 const { clearDir, createDir } = require('./file');
 

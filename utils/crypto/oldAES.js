@@ -2,16 +2,6 @@ const aesjs = require('aes-js');
 
 module.exports = class AES {
     static key128 = Array.from(Array(16).keys());
-    static key192 = Array.from(Array(24).keys());
-    static key256 = Array.from(Array(32).keys());
-
-    static key128Array = new Uint8Array(AES.key128);
-    static key192Array = new Uint8Array(AES.key192);
-    static key256Array = new Uint8Array(AES.key256);
-
-    static key128Buffer = Buffer.from(AES.key128);
-    static key192Buffer = Buffer.from(AES.key192);
-    static key256Buffer = Buffer.from(AES.key256);
 
     /**
      * Initialization Vector
