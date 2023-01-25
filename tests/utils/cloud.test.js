@@ -1,7 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
-let getFilesFromCloud, uploadToCloud, deleteFromCloud;
+let fs, path, getFilesFromCloud, uploadToCloud, deleteFromCloud;
 
 const filename = 'test.pdf';
 const filename2 = 'test2.pdf';
@@ -81,20 +78,24 @@ describe('getFilesFromCloud function', () => {
             const pdfs = await getFilesFromCloud();
             try {
                 expect(pdfs).toEqual([]);
-            } catch (e) {
-                expect(e.message).toEqual(errorMessage);
+            } catch (err) {
+                expect(err.message).toEqual(errorMessage);
             }
         });
     });
 });
 
 describe('uploadToCloud function', () => {
-    beforeAll(() => {
-        fs.readFileSync = jest.fn().mockReturnValue('test');
-    });
-
     beforeEach(() => {
         jest.resetModules();
+
+        jest.mock('fs', () => {
+            return {
+                readFileSync: jest.fn().mockReturnValue(Buffer.from('test'))
+            };
+        });
+
+        fs = require('fs');
     });
 
     describe('success scenario', () => {
@@ -147,24 +148,28 @@ describe('uploadToCloud function', () => {
 
         it('should throw an error if uploading failed', async () => {
             const pdf = await uploadToCloud(filePath, filename);
-
             try {
                 expect(fs.readFileSync).toHaveBeenCalledWith(filePath);
                 expect(pdf).toEqual({ success: false, name: filename, url: '' });
-            } catch (e) {
-                expect(e.message).toEqual(errorMessage);
+            } catch (err) {
+                expect(err.message).toEqual(errorMessage);
             }
         });
     });
 });
 
 describe('deleteFromCloud function', () => {
-    beforeAll(() => {
-        path.basename = jest.fn().mockReturnValue(filename);
-    });
-
     beforeEach(() => {
         jest.resetModules();
+
+        jest.mock('path', () => {
+            return {
+                ...jest.requireActual('path'),
+                basename: jest.fn().mockReturnValue('test.pdf')
+            };
+        });
+
+        path = require('path');
     });
 
     describe('success scenario', () => {
@@ -216,11 +221,10 @@ describe('deleteFromCloud function', () => {
 
         it('should throw an error if uploading failed', async () => {
             const pdf = await deleteFromCloud(filePath);
-
             try {
                 expect(pdf).toEqual({ success: false, name: filename, url: '' });
-            } catch (e) {
-                expect(e.message).toEqual(errorMessage);
+            } catch (err) {
+                expect(err.message).toEqual(errorMessage);
             }
         });
     });

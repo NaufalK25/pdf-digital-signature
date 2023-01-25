@@ -24,7 +24,7 @@ const getFilesFromCloud = async () => {
             });
         }
         return pdfs;
-    } catch (error) {
+    } catch (err) {
         return [];
     }
 };
@@ -44,7 +44,7 @@ const uploadToCloud = async (filePath, filename) => {
             const sharedLinkRes = await dbx.sharingCreateSharedLinkWithSettings({ path: response.result.path_lower });
             result.url = sharedLinkRes.result.url;
         }
-    } catch (error) {
+    } catch (err) {
         result.success = false;
     }
 
@@ -66,7 +66,7 @@ const deleteFromCloud = async filePath => {
             const sharedLinkRes = await dbx.sharingCreateSharedLinkWithSettings({ path: response.result.path_lower });
             result.url = sharedLinkRes.result.url;
         }
-    } catch (error) {
+    } catch (err) {
         result.success = false;
     }
 
