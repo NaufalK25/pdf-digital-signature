@@ -18,7 +18,7 @@ module.exports = class PDF {
             const encryptedData = [];
 
             fileBuffer.toJSON().data.forEach(byte => {
-                encryptedData.push(AES.encrypt(byte, AES.key128, 'CTR'));
+                encryptedData.push(AES.encrypt(byte, AES.key128));
             });
 
             fs.writeFileSync(dest, Buffer.from(encryptedData));
@@ -42,7 +42,7 @@ module.exports = class PDF {
             const decryptedData = [];
 
             fileBuffer.toJSON().data.forEach(byte => {
-                decryptedData.push(AES.decrypt(byte, AES.key128, 'CTR'));
+                decryptedData.push(AES.decrypt(byte, AES.key128));
             });
 
             fs.writeFileSync(dest, Buffer.from(decryptedData));
