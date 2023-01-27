@@ -1,55 +1,39 @@
 const asciiToHex = (str = '') => {
-    let hex = '';
-    for (const char of str) {
-        hex += char.charCodeAt(0).toString(16);
-    }
-
-    return hex;
+    return str
+        .split('')
+        .map(char => char.charCodeAt(0).toString(16))
+        .join('');
 };
 
 const hexToAscii = (hex = '') => {
-    let ascii = '';
-    for (let i = 0; i < hex.length; i += 2) {
-        ascii += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    if (!hex || hex.length % 2 !== 0) {
+        return '';
     }
 
-    return ascii;
+    return hex
+        .match(/.{1,2}/g)
+        .map(byte => String.fromCharCode(parseInt(byte, 16)))
+        .join('');
 };
 
 const bytesToHex = (bytes = []) => {
-    let hex = '';
-    for (const byte of bytes) {
-        hex += byte.toString(16);
-    }
-
-    return hex;
+    return bytes.map(byte => byte.toString(16)).join('');
 };
 
 const hexToBytes = (hex = '') => {
-    const bytes = [];
-    for (let i = 0; i < hex.length; i += 2) {
-        bytes.push(parseInt(hex.substr(i, 2), 16));
+    if (!hex || hex.length % 2 !== 0) {
+        return [];
     }
 
-    return bytes;
+    return hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
 };
 
 const bytesToAscii = (bytes = []) => {
-    let ascii = '';
-    for (const byte of bytes) {
-        ascii += String.fromCharCode(byte);
-    }
-
-    return ascii;
+    return bytes.map(byte => String.fromCharCode(byte)).join('');
 };
 
 const asciiToBytes = (str = '') => {
-    const bytes = [];
-    for (const char of str) {
-        bytes.push(char.charCodeAt(0));
-    }
-
-    return bytes;
+    return str.split('').map(char => char.charCodeAt(0));
 };
 
 module.exports = {

@@ -1,4 +1,4 @@
-let fs, path, getFilesFromCloud, uploadToCloud, deleteFromCloud;
+let fs, getFilesFromCloud, uploadToCloud, deleteFromCloud;
 
 const filename = 'test.pdf';
 const filename2 = 'test2.pdf';
@@ -168,8 +168,6 @@ describe('deleteFromCloud function', () => {
                 basename: jest.fn().mockReturnValue('test.pdf')
             };
         });
-
-        path = require('path');
     });
 
     describe('success scenario', () => {
