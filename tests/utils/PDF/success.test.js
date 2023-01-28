@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const AES = require('../../utils/crypto/oldAES');
-const { deleteFromCloud, uploadToCloud } = require('../../utils/cloud');
-const { clearDir, createDir } = require('../../utils/file');
+const AES = require('../../../utils/crypto/oldAES');
+const { deleteFromCloud, uploadToCloud } = require('../../../utils/cloud');
+const { clearDir, createDir } = require('../../../utils/file');
 
 jest.mock('fs', () => {
     return {
@@ -19,7 +19,7 @@ jest.mock('path', () => {
     };
 });
 
-jest.mock('../../utils/cloud', () => {
+jest.mock('../../../utils/cloud', () => {
     return {
         deleteFromCloud: jest.fn(() =>
             Promise.resolve({
@@ -38,21 +38,21 @@ jest.mock('../../utils/cloud', () => {
     };
 });
 
-jest.mock('../../utils/file', () => {
+jest.mock('../../../utils/file', () => {
     return {
         createDir: jest.fn(),
         clearDir: jest.fn()
     };
 });
 
-jest.mock('../../utils/crypto/oldAES', () => {
+jest.mock('../../../utils/crypto/oldAES', () => {
     return {
         encrypt: jest.fn(byte => byte + 1),
         decrypt: jest.fn(byte => byte - 1)
     };
 });
 
-const PDF = require('../../utils/PDF');
+const PDF = require('../../../utils/PDF');
 
 describe('PDF Class', () => {
     it('can be instantiated', () => {
