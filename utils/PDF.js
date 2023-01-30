@@ -4,7 +4,7 @@ const AES = require('./crypto/oldAES');
 const { deleteFromCloud, uploadToCloud } = require('./cloud');
 const { clearDir, createDir } = require('./file');
 
-module.exports = class PDF {
+class PDF {
     constructor(filePath = '') {
         this.filePath = filePath;
     }
@@ -56,4 +56,6 @@ module.exports = class PDF {
 
         return this;
     }
-};
+}
+
+module.exports = PDF;

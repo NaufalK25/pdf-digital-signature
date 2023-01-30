@@ -1,6 +1,6 @@
 const aesjs = require('aes-js');
 
-module.exports = class AES {
+class AES {
     static key128 = Array.from(Array(16).keys());
 
     static encrypt(byte, key) {
@@ -14,4 +14,6 @@ module.exports = class AES {
         const decryptedBytes = aesCtr.decrypt([byte]);
         return decryptedBytes[0];
     }
-};
+}
+
+module.exports = AES;

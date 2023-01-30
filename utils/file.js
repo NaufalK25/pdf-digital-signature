@@ -21,5 +21,5 @@ const clearDir = (dirPath, except = []) => {
 
 module.exports = {
     createDir,
-    clearDir,
+    clearDir
 };
