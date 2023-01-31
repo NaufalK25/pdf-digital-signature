@@ -1,12 +1,14 @@
 const fs = require('fs');
 const path = require('path');
-const AES = require('./crypto/oldAES');
+const AES = require('./crypto/AES');
 const { deleteFromCloud, uploadToCloud } = require('./cloud');
 const { clearDir, createDir } = require('./file');
+const { decToText, textToDec } = require('./converter');
 
 class PDF {
     constructor(filePath = '') {
         this.filePath = filePath;
+        this.aes = new AES();
     }
 
     async encrypt(dest) {
@@ -15,13 +17,12 @@ class PDF {
             createDir(dir);
 
             const fileBuffer = fs.readFileSync(this.filePath);
-            const encryptedData = [];
 
-            fileBuffer.toJSON().data.forEach(byte => {
-                encryptedData.push(AES.encrypt(byte, AES.key128));
-            });
+            const plaintext = fileBuffer.toJSON().data.map(decToText).join();
+            const ciphertext = this.aes.encrypt(plaintext);
+            const encryptedBuffer = Buffer.from([...ciphertext].map(textToDec));
 
-            fs.writeFileSync(dest, Buffer.from(encryptedData));
+            fs.writeFileSync(dest, encryptedBuffer);
             await uploadToCloud(dest, path.basename(dest));
 
             await deleteFromCloud(this.filePath);
@@ -39,13 +40,12 @@ class PDF {
             createDir(dir);
 
             const fileBuffer = fs.readFileSync(this.filePath);
-            const decryptedData = [];
 
-            fileBuffer.toJSON().data.forEach(byte => {
-                decryptedData.push(AES.decrypt(byte, AES.key128));
-            });
+            const ciphertext = fileBuffer.toJSON().data.map(decToText).join();
+            const plaintext = this.aes.decrypt(ciphertext);
+            const decryptedBuffer = Buffer.from([...plaintext].map(textToDec));
 
-            fs.writeFileSync(dest, Buffer.from(decryptedData));
+            fs.writeFileSync(dest, decryptedBuffer);
             await uploadToCloud(dest, path.basename(dest));
 
             await deleteFromCloud(this.filePath);

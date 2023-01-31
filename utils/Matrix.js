@@ -26,6 +26,13 @@ class Matrix {
         return this;
     }
 
+    flat() {
+        const result = [];
+         this.matrix.forEach(row => row.forEach(value => result.push(value)));
+         this.matrix = result;
+        return this;
+    }
+
     convertValue(from, to) {
         this.matrix = this.matrix.map(row => row.map(value => converter(value, from, to)));
         return this;

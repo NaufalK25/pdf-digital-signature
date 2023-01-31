@@ -6,9 +6,8 @@ class MatrixColumn {
     }
 
     shiftUp() {
-        const first = this.column[0];
-        const rest = this.column.slice(1);
-        return new MatrixColumn([...rest, first]);
+        this.column = this.column.slice(1).concat(this.column[0]);
+        return this;
     }
 
     convertValue(from, to) {
@@ -20,12 +19,8 @@ class MatrixColumn {
         const result = [];
         for (let i = 0; i < this.column.length; i++) {
             let binRow = '';
-            for (let j = 0; j < this.column[i].length; j++) {
-                let xor = this.column[i][j];
-                otherColumns.forEach(otherColumn => {
-                    xor ^= otherColumn.column[i][j];
-                });
-                binRow += xor;
+            for (let j = 0; j < otherColumns.length; j++) {
+                binRow += this.column[i] ^ otherColumns[j].column[i];
             }
 
             result.push(binRow);
@@ -40,11 +35,12 @@ class MatrixColumn {
             result.push(this.galoisMultiplication(this.column[i], otherColumn.column[i]));
         }
 
-        return result;
+        return new MatrixColumn(result);
     }
 
     galoisMultiplication(a, b) {
         let res = 0;
+
         for (let i = 0; i < 8; i++) {
             if (b & 1) {
                 res ^= a;

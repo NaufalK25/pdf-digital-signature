@@ -10,7 +10,7 @@ const getFilesFromCloud = async () => {
         const response = await dbx.filesListFolder({ path: '' });
         const result = response.result.entries;
         const pdfs = [];
-
+        
         for (const { name, path_lower } of result) {
             if (!name.endsWith('.pdf')) {
                 continue;
