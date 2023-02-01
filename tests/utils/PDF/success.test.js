@@ -1,6 +1,6 @@
 // const fs = require('fs');
 // const path = require('path');
-// const AES = require('../../../utils/crypto/oldAES');
+// const AES = require('../../../utils/AES');
 // const { deleteFromCloud, uploadToCloud } = require('../../../utils/cloud');
 // const { clearDir, createDir } = require('../../../utils/file');
 
@@ -45,7 +45,7 @@
 //     };
 // });
 
-// jest.mock('../../../utils/crypto/oldAES', () => {
+// jest.mock('../../../utils/AES', () => {
 //     return {
 //         encrypt: jest.fn(byte => byte + 1),
 //         decrypt: jest.fn(byte => byte - 1)

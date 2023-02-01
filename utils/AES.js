@@ -1,7 +1,7 @@
 require('dotenv').config();
-const Matrix = require('../Matrix');
-const MatrixColumn = require('../MatrixColumn');
-const { decToHex, decToText, textToDec } = require('../converter');
+const Matrix = require('./Matrix');
+const MatrixColumn = require('./MatrixColumn');
+const { decToHex } = require('./converter');
 
 class AES {
     /**
@@ -91,7 +91,7 @@ class AES {
     constructor() {
         this.key = this.padKey(process.env.AES_KEY);
         this.keySchedule = this.keyExpansion();
-        this.plaintextLength = 0;
+        this.paddingLength = 0;
     }
 
     pad(str) {
@@ -110,7 +110,7 @@ class AES {
         return key;
     }
 
-    subBytes(byte, inverse = false) {
+    subBytes(byte) {
         const [row, col] = byte
             .toString()
             .split('')
@@ -241,12 +241,16 @@ class AES {
     }
 
     encrypt(plaintext) {
-        this.plaintextLength = plaintext.length;
-
         return plaintext
             .match(/[\s\S]{1,16}/g)
             .map(block => {
                 const paddedBlock = this.pad(block);
+
+                const paddingLength = paddedBlock.length - block.length;
+                if (paddingLength > 0) {
+                    this.paddingLength = paddingLength;
+                }
+
                 const initialAddRoundKeyResult = this.initialAddRoundKeyRound(paddedBlock);
                 let roundResult = initialAddRoundKeyResult;
 
@@ -325,7 +329,7 @@ class AES {
         return this.invMixColumnsRound(invAddRoundKeyResult);
     }
 
-    decrypt(ciphertext) {
+    decrypt(ciphertext, paddingLength = 0) {
         const cipherArr = [...ciphertext].map(char => char);
 
         const cipherArr16 = [];
@@ -348,38 +352,8 @@ class AES {
             })
             .join('');
 
-        return decryptedText.slice(0, this.plaintextLength);
+        return decryptedText.slice(0, decryptedText.length - paddingLength);
     }
 }
-
-// const fs = require('fs');
-// const path = require('path');
-
-// const start = Date.now();
-
-// const dirPath = path.join(__dirname, '..', '..', 'uploads');
-
-// const pdf = fs.readFileSync(path.join(dirPath, '1674805342856-Diagram - SOP Proposal dan Skripsi - rev4.pdf'));
-
-// const plaintext = pdf.toJSON().data.map(decToText).join('');
-
-// const aes = new AES();
-// const ciphertext = aes.encrypt(plaintext);
-// const decryptedText = aes.decrypt(ciphertext);
-
-// console.log([
-//     Buffer.from([...ciphertext].map(textToDec)),
-//     Buffer.from(pdf.toJSON().data).equals(Buffer.from([...plaintext].map(textToDec))),
-//     Buffer.from(pdf.toJSON().data).equals(Buffer.from([...decryptedText].map(textToDec)))
-// ]);
-
-// const end = Date.now();
-// const miliseconds = end - start;
-// const seconds = miliseconds / 1000;
-// const minutes = seconds / 60;
-
-// console.log('Miliseconds: ', miliseconds, 'ms');
-// console.log('Seconds: ', seconds, 's');
-// console.log('Minutes: ', minutes, 'm');
 
 module.exports = AES;

@@ -8,10 +8,10 @@ const getRoot = async (req, res) => {
     const pdfs = await getFilesFromCloud();
 
     pdfs.sort((a, b) => (a.name > b.name ? -1 : 1)).forEach(pdf => {
-        pdf.isEncrypted = false;
-        if (pdf.name.startsWith('encrypted-')) {
-            pdf.isEncrypted = true;
-        }
+        const filePath = path.join(uploadsDir, pdf.name);
+        const file = fs.readFileSync(filePath);
+        const fileBufferArr = file.toJSON().data;
+        pdf.isEncrypted = fileBufferArr.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i]);
     });
 
     res.render('index', { pdfs });
