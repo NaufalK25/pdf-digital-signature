@@ -7,15 +7,11 @@ package-lock.json
 .env.*
 !.env.example
 
-coverage/
-
 # Code Editor
 .vscode/
 
 # Misc
 *.pdf
-temp/
-!tests/**/*.pdf
 public/**/*.css
 public/**/*.js
 !public/**/*.min.css
