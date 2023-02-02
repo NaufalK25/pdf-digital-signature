@@ -29,11 +29,11 @@ class BLAKE2s {
     static PERSONALIZATION_LENGTH = 8;
     static SALT_LENGTH = 8;
 
-    // static digestLength = BLAKE2s.MAX_DIGEST_LENGTH;
-    // static blockLength = BLAKE2s.BLOCK_LENGTH;
-    // static keyLength = BLAKE2s.MAX_KEY_LENGTH;
-    // static personalizationLength = BLAKE2s.PERSONALIZATION_LENGTH;
-    // static saltLength = BLAKE2s.SALT_LENGTH;
+    static digestLength = BLAKE2s.MAX_DIGEST_LENGTH;
+    static blockLength = BLAKE2s.BLOCK_LENGTH;
+    static keyLength = BLAKE2s.MAX_KEY_LENGTH;
+    static personalizationLength = BLAKE2s.PERSONALIZATION_LENGTH;
+    static saltLength = BLAKE2s.SALT_LENGTH;
 
     /**
      * Initialization Vector
@@ -1312,20 +1312,13 @@ class BLAKE2s {
         this.hashStates[7] ^= v7 ^ v15;
     }
 
-    update(p, offset, length) {
+    update(p, offset = 0, length = p.length - offset) {
         if (typeof p === 'string') {
             throw new TypeError('update() accepts Uint8Array or an Array of bytes');
         }
 
         if (this.isFinished) {
             throw new Error('update() after calling digest()');
-        }
-
-        if (offset === undefined) {
-            offset = 0;
-        }
-        if (length === undefined) {
-            length = p.length - offset;
         }
 
         if (length === 0) {

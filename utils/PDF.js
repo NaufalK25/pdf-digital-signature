@@ -30,9 +30,9 @@ class PDF {
             this.paddingLength = this.aes.paddingLength;
 
             fs.writeFileSync(dest, encryptedBuffer);
-            await uploadToCloud(dest, path.basename(dest));
+            // await uploadToCloud(dest, path.basename(dest));
 
-            await deleteFromCloud(this.filePath);
+            // await deleteFromCloud(this.filePath);
             fs.unlinkSync(this.filePath);
         } catch (err) {
             clearDir(dir, ['.gitkeep']);
@@ -53,9 +53,9 @@ class PDF {
             const decryptedBuffer = Buffer.from([...plaintext].map(textToDec));
 
             fs.writeFileSync(dest, decryptedBuffer);
-            await uploadToCloud(dest, path.basename(dest));
+            // await uploadToCloud(dest, path.basename(dest));
 
-            await deleteFromCloud(this.filePath);
+            // await deleteFromCloud(this.filePath);
             fs.unlinkSync(this.filePath);
         } catch (err) {
             clearDir(dir, ['.gitkeep']);
