@@ -1,6 +1,4 @@
-# PDF Encryption
-
-PDF Encryption is a simple website to encrypt and decrypt PDF files using [AES-128](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) encryption.
+# PDF Digital Signature
 
 ### Prerequisites
 
@@ -27,7 +25,7 @@ PDF Encryption is a simple website to encrypt and decrypt PDF files using [AES-1
 1. Clone the repository
 
     ```bash
-    $ git clone https://github.com/NaufalK25/pdf-encryption.git
+    $ git clone https://github.com/NaufalK25/pdf-digital-signature.git
     ```
 
 2. Install dependencies

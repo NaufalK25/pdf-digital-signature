@@ -329,7 +329,7 @@ class AES {
         return this.invMixColumnsRound(invAddRoundKeyResult);
     }
 
-    decrypt(ciphertext, paddingLength = 0) {
+    decrypt(ciphertext, paddingLength = this.paddingLength) {
         const cipherArr = [...ciphertext].map(char => char);
 
         const cipherArr16 = [];
