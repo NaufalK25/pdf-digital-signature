@@ -14,7 +14,6 @@
 </head>
 
 <body>
-
     <nav>
         <p>PDF Digital Signature</p>
         <a href="https://github.com/NaufalK25/pdf-digital-signature" target="_blank" rel="noopener noreferrer" class="nav-icon" title="NaufalK25/pdf-digital-signature">
@@ -65,7 +64,7 @@
                             <a href="<%= pdf.url %>" target="_blank" rel="noopener noreferrer" title="<%= pdf.name %>"><%= pdf.name %></a>
                             <% if (pdf.isHashed) { %>
                             <div>
-                                <span class="text-small">Public Key: <%= pdf.publicKey %></span>
+                                <span class="text-small">Public Key: <%= pdf.publicKey || '-' %></span>
                             </div>
                             <% } %>
                             <div class="<%= !pdf.isEncrypted && 'visually-hidden' %>">
