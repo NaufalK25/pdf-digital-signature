@@ -1,8 +1,17 @@
+/**
+ * Check whether the given array is a Uint8Array or an Array of bytes
+ * @param {number[]|Uint8Array} arr
+ * @returns
+ */
 const isByteArray = arr => {
     return arr instanceof Uint8Array || Array.isArray(arr);
 };
 
-const checkConfig = config => {
+/**
+ * Validate the given config object
+ * @param {number[]|Uint8Array|{key?:number[]|Uint8Array;salt?:number[]|Uint8Array;personalization?:number[]|Uint8Array}} config
+ */
+const validateConfigKeys = config => {
     for (const key in config) {
         switch (key) {
             case 'key':
@@ -18,7 +27,13 @@ const checkConfig = config => {
     }
 };
 
-const load32 = (arr, idx) => {
+/**
+ * Convert a byte array to 32-bit integer
+ * @param {number[]} arr
+ * @param {number} idx
+ * @returns
+ */
+const bytesToInt32 = (arr, idx) => {
     return (arr[idx + 0] & 0xff) | ((arr[idx + 1] & 0xff) << 8) | ((arr[idx + 2] & 0xff) << 16) | ((arr[idx + 3] & 0xff) << 24);
 };
 
@@ -40,6 +55,10 @@ class BLAKE2s {
      */
     static IV = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
 
+    /**
+     * @param {number} digestLength
+     * @param {number[]|Uint8Array} keyOrConfig
+     */
     constructor(digestLength, keyOrConfig) {
         if (digestLength === undefined) {
             digestLength = BLAKE2s.MAX_DIGEST_LENGTH;
@@ -58,7 +77,7 @@ class BLAKE2s {
             key = keyOrConfig;
             keyLength = key.length;
         } else if (typeof keyOrConfig === 'object') {
-            checkConfig(keyOrConfig);
+            validateConfigKeys(keyOrConfig);
 
             key = keyOrConfig.key;
             keyLength = key?.length || 0;
@@ -86,16 +105,16 @@ class BLAKE2s {
         this.hashStates = new Uint32Array(BLAKE2s.IV);
 
         const param = new Uint8Array([digestLength & 0xff, keyLength, 1, 1]);
-        this.hashStates[0] ^= load32(param, 0);
+        this.hashStates[0] ^= bytesToInt32(param, 0);
 
         if (salt) {
-            this.hashStates[4] ^= load32(salt, 0);
-            this.hashStates[5] ^= load32(salt, 4);
+            this.hashStates[4] ^= bytesToInt32(salt, 0);
+            this.hashStates[5] ^= bytesToInt32(salt, 4);
         }
 
         if (personalization) {
-            this.hashStates[6] ^= load32(personalization, 0);
-            this.hashStates[7] ^= load32(personalization, 4);
+            this.hashStates[6] ^= bytesToInt32(personalization, 0);
+            this.hashStates[7] ^= bytesToInt32(personalization, 4);
         }
 
         this.bufferFromData = new Uint8Array(BLAKE2s.BLOCK_LENGTH);
@@ -120,6 +139,9 @@ class BLAKE2s {
         }
     }
 
+    /**
+     * @param {number} length
+     */
     processBlock(length) {
         this.trackCounter0 += length;
         if (this.trackCounter0 != this.trackCounter0 >>> 0) {
@@ -1312,6 +1334,13 @@ class BLAKE2s {
         this.hashStates[7] ^= v7 ^ v15;
     }
 
+    /**
+     * Update the hash with the given data.
+     * @param {number[]|Uint8Array} p - data to hash
+     * @param {number} offset
+     * @param {number} length
+     * @returns
+     */
     update(p, offset = 0, length = p.length - offset) {
         if (typeof p === 'string') {
             throw new TypeError('update() accepts Uint8Array or an Array of bytes');
@@ -1358,6 +1387,10 @@ class BLAKE2s {
         return this;
     }
 
+    /**
+     * Returns the hash as an array of bytes.
+     * @returns
+     */
     digest() {
         let i;
 
@@ -1387,6 +1420,10 @@ class BLAKE2s {
         return this.result;
     }
 
+    /**
+     * Returns the hash as a hex string.
+     * @returns
+     */
     hexDigest() {
         const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
         const out = [];

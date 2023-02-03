@@ -3,6 +3,9 @@ const Matrix = require('./Matrix');
 const MatrixColumn = require('./MatrixColumn');
 const { decToHex } = require('./converter');
 
+/**
+ * AES 128-bit
+ */
 class AES {
     /**
      * S-Box (Substitution Box)
@@ -85,19 +88,26 @@ class AES {
         [0x0b, 0x0d, 0x09, 0x0e]
     ];
 
-    /**
-     * AES 128-bit
-     */
     constructor() {
         this.key = this.padKey(process.env.AES_KEY);
         this.keySchedule = this.keyExpansion();
         this.paddingLength = 0;
     }
 
+    /**
+     * Pads the string to 16 characters
+     * @param {string} str
+     * @returns
+     */
     pad(str) {
         return str.padEnd(16, ' ');
     }
 
+    /**
+     * Pads the key to 16 characters
+     * @param {string} key
+     * @returns
+     */
     padKey(key) {
         if (key.length < 16) {
             return this.pad(key);
@@ -110,6 +120,11 @@ class AES {
         return key;
     }
 
+    /**
+     * Sub bytes with AES S-Box
+     * @param {number} byte
+     * @returns
+     */
     subBytes(byte) {
         const [row, col] = byte
             .toString()
@@ -118,6 +133,11 @@ class AES {
         return decToHex(AES.sBox[row][col]);
     }
 
+    /**
+     * Sub bytes with AES Inverse S-Box
+     * @param {number} byte
+     * @returns
+     */
     invSubBytes(byte) {
         const [row, col] = byte
             .toString()
@@ -126,6 +146,10 @@ class AES {
         return decToHex(AES.invSBox[row][col]);
     }
 
+    /**
+     * Generate key schedule
+     * @returns {string[][]}
+     */
     keyExpansion() {
         const keyHexMatrix = Matrix.createFromText(this.key).convertValue('dec', 'hex').matrix;
         let keySchedule = [...keyHexMatrix, ...Array(40).fill([])];
@@ -168,15 +192,27 @@ class AES {
         }, []);
     }
 
+    /**
+     * @param {string} plaintext
+     * @returns {string[][]}
+     */
     initialAddRoundKeyRound(plaintext) {
         const keyHexMatrix = Matrix.createFromText(this.key).transpose().convertValue('dec', 'bin');
         return Matrix.createFromText(plaintext).transpose().convertValue('dec', 'bin').xor(keyHexMatrix).convertValue('bin', 'hex').matrix;
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @returns
+     */
     subBytesRound(hexMatrix) {
         return hexMatrix.map(row => row.map(this.subBytes));
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @returns
+     */
     shiftRowsRound(hexMatrix) {
         return hexMatrix.map((row, index) => {
             const shiftedRow = [];
@@ -188,6 +224,10 @@ class AES {
         });
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @returns
+     */
     mixColumnsRound(hexMatrix) {
         const mixedColumns = [];
         const matrix = new Matrix(hexMatrix).transpose().matrix;
@@ -222,12 +262,22 @@ class AES {
         return mixedMatrix;
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @param {number} roundKey
+     * @returns {string[][]}
+     */
     addRoundKeyRound(hexMatrix, roundKey) {
         const nthRoundKeySchedule = this.keySchedule[roundKey];
         const nthRoundKeyMatrix = new Matrix(nthRoundKeySchedule).transpose().convertValue('hex', 'bin');
         return new Matrix(hexMatrix).convertValue('hex', 'bin').xor(nthRoundKeyMatrix).convertValue('bin', 'hex').matrix;
     }
 
+    /**
+     * @param {string[][]} matrix
+     * @param {number} roundKey
+     * @returns
+     */
     encryptRound(matrix, roundKey) {
         const subBytesResult = this.subBytesRound(matrix);
         const shiftRowsResult = this.shiftRowsRound(subBytesResult);
@@ -240,6 +290,11 @@ class AES {
         return this.addRoundKeyRound(mixColumnsResult, roundKey);
     }
 
+    /**
+     * Encrypt a plaintext using the AES algorithm
+     * @param {string} plaintext
+     * @returns
+     */
     encrypt(plaintext) {
         return plaintext
             .match(/[\s\S]{1,16}/g)
@@ -263,11 +318,19 @@ class AES {
             .join('');
     }
 
+    /**
+     * @param {string} ciphertext
+     * @returns {string[][]}
+     */
     initialInvAddRoundKeyRound(ciphertext) {
         const lastRoundKeyMatrix = new Matrix(this.keySchedule[10]).transpose().convertValue('hex', 'bin');
         return Matrix.createFromText(ciphertext).transpose().convertValue('dec', 'bin').xor(lastRoundKeyMatrix).convertValue('bin', 'hex').matrix;
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @returns
+     */
     invShiftRowsRound(hexMatrix) {
         return hexMatrix.map((row, index) => {
             const shiftedRow = [];
@@ -279,10 +342,18 @@ class AES {
         });
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @returns
+     */
     invSubBytesRound(hexMatrix) {
         return hexMatrix.map(row => row.map(this.invSubBytes));
     }
 
+    /**
+     * @param {string[][]} hexMatrix
+     * @returns
+     */
     invMixColumnsRound(hexMatrix) {
         const mixedColumns = [];
         const matrix = new Matrix(hexMatrix).transpose().matrix;
@@ -317,6 +388,11 @@ class AES {
         return mixedMatrix;
     }
 
+    /**
+     * @param {string[][]} matrix
+     * @param {number} roundKey
+     * @returns
+     */
     decryptRound(matrix, roundKey) {
         const invShiftRowsResult = this.invShiftRowsRound(matrix);
         const invSubBytesResult = this.invSubBytesRound(invShiftRowsResult);
@@ -329,6 +405,12 @@ class AES {
         return this.invMixColumnsRound(invAddRoundKeyResult);
     }
 
+    /**
+     * Decrypts a ciphertext using the AES algorithm
+     * @param {string} ciphertext
+     * @param {number} paddingLength
+     * @returns
+     */
     decrypt(ciphertext, paddingLength = this.paddingLength) {
         const cipherArr = [...ciphertext].map(char => char);
 
@@ -355,5 +437,8 @@ class AES {
         return decryptedText.slice(0, decryptedText.length - paddingLength);
     }
 }
+
+const aes = new AES();
+console.log(aes.keySchedule);
 
 module.exports = AES;

@@ -3,8 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const { Dropbox } = require('dropbox');
 
+/**
+ * Dropbox client
+ */
 const dbx = new Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN });
 
+/**
+ * Get all pdf files from Dropbox
+ * @returns
+ */
 const getFilesFromCloud = async () => {
     try {
         const response = await dbx.filesListFolder({ path: '' });
@@ -19,16 +26,29 @@ const getFilesFromCloud = async () => {
             const sharedLinkRes = await dbx.sharingCreateSharedLinkWithSettings({ path: path_lower });
 
             pdfs.push({
+                success: true,
                 name,
                 url: sharedLinkRes.result.url
             });
         }
         return pdfs;
     } catch (err) {
-        return [];
+        return [
+            {
+                success: false,
+                name: '',
+                url: ''
+            }
+        ];
     }
 };
 
+/**
+ * Upload file to Dropbox
+ * @param {string} filePath
+ * @param {string} filename
+ * @returns
+ */
 const uploadToCloud = async (filePath, filename) => {
     const file = fs.readFileSync(filePath);
     const result = {
@@ -51,6 +71,11 @@ const uploadToCloud = async (filePath, filename) => {
     return result;
 };
 
+/**
+ * Delete file from Dropbox
+ * @param {string} filePath
+ * @returns
+ */
 const deleteFromCloud = async filePath => {
     const filename = path.basename(filePath);
     const result = {

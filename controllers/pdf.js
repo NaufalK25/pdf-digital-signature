@@ -1,9 +1,15 @@
 const fs = require('fs');
 const path = require('path');
+const express = require('express');
 const PDF = require('../utils/PDF');
 const { deleteFromCloud, getFilesFromCloud, uploadToCloud } = require('../utils/cloud');
 const { baseUrl, uploadsDir } = require('../utils/constant');
 
+/**
+ * Get the root page controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const getRoot = async (req, res) => {
     // const pdfs = await getFilesFromCloud();
 
@@ -33,6 +39,11 @@ const getRoot = async (req, res) => {
     res.render('index', { pdfs });
 };
 
+/**
+ * Encrypt a PDF file controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const encryptPDF = async (req, res) => {
     let file = req.body.encrypted_file;
 
@@ -47,6 +58,11 @@ const encryptPDF = async (req, res) => {
     res.redirect('/');
 };
 
+/**
+ * Decrypt a PDF file controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const decryptPDF = async (req, res) => {
     let file = req.body.decrypted_file;
 
@@ -61,6 +77,11 @@ const decryptPDF = async (req, res) => {
     res.redirect('/');
 };
 
+/**
+ * Upload a PDF file controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const uploadPDF = async (req, res) => {
     // for (const file of req.files) {
     //     await uploadToCloud(file.path, file.filename);
@@ -69,6 +90,11 @@ const uploadPDF = async (req, res) => {
     res.redirect('/');
 };
 
+/**
+ * Delete a PDF file controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const deletePDF = async (req, res) => {
     const file = req.body.deleted_file;
 
@@ -78,6 +104,11 @@ const deletePDF = async (req, res) => {
     res.redirect('/');
 };
 
+/**
+ * Delete all PDF files controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
 const deleteAllPDF = async (req, res) => {
     // const pdfs = await getFilesFromCloud();
 

@@ -7,16 +7,25 @@ const { decToText, textToDec } = require('./converter');
 
 class PDF {
     /**
-     * A valid PDF file starts with the following bytes: [37, 80, 68, 70, 45, 49, 46]
+     * A valid PDF file starts with the following bytes: `[37, 80, 68, 70, 45, 49, 46]`
      */
     static validPDFBuffer = [37, 80, 68, 70, 45, 49, 46];
 
+    /**
+     *
+     * @param {string} filePath
+     */
     constructor(filePath = '') {
         this.filePath = filePath;
         this.aes = new AES();
         this.paddingLength = 0;
     }
 
+    /**
+     * Do AES encryption on the PDF file
+     * @param {string} dest
+     * @returns
+     */
     async encrypt(dest) {
         const dir = path.dirname(dest);
         try {
@@ -41,6 +50,11 @@ class PDF {
         return this;
     }
 
+    /**
+     * Do AES decryption on the PDF file
+     * @param {string} dest
+     * @returns
+     */
     async decrypt(dest) {
         const dir = path.dirname(dest);
         try {

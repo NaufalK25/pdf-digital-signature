@@ -43,14 +43,14 @@ describe('getFilesFromCloud function', () => {
         it('should return pdfs with name and url', async () => {
             const pdfs = await getFilesFromCloud();
             expect(pdfs).toEqual([
-                { name: filename, url },
-                { name: filename2, url }
+                { success: true, name: filename, url },
+                { success: true, name: filename2, url }
             ]);
         });
 
         it('should not include non-pdf files', async () => {
             const pdfs = await getFilesFromCloud();
-            expect(pdfs).not.toContainEqual({ name: dummyFilename, url });
+            expect(pdfs).not.toContainEqual({ success: true, name: dummyFilename, url });
         });
     });
 
@@ -77,7 +77,13 @@ describe('getFilesFromCloud function', () => {
         it('should return empty array if error occurs', async () => {
             const pdfs = await getFilesFromCloud();
             try {
-                expect(pdfs).toEqual([]);
+                expect(pdfs).toEqual([
+                    {
+                        success: false,
+                        name: '',
+                        url: ''
+                    }
+                ]);
             } catch (err) {
                 expect(err.message).toEqual(errorMessage);
             }
