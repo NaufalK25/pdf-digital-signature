@@ -1,15 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 const AES = require('./AES');
+const BLAKE2s = require('./BLAKE2s');
 const { deleteFromCloud, uploadToCloud } = require('./cloud');
 const { clearDir, createDir } = require('./file');
 const { decToText, textToDec } = require('./converter');
+const { addPublicKey } = require('./publicKey');
 
 class PDF {
     /**
      * A valid PDF file starts with the following bytes: `[37, 80, 68, 70, 45, 49, 46]`
      */
     static validPDFBuffer = [37, 80, 68, 70, 45, 49, 46];
+
+    /**
+     * Empty PDF file has `967` bytes
+     */
+    static minPDFBufferLength = 967;
 
     /**
      *
@@ -44,7 +51,7 @@ class PDF {
             // await deleteFromCloud(this.filePath);
             fs.unlinkSync(this.filePath);
         } catch (err) {
-            clearDir(dir, ['.gitkeep']);
+            return;
         }
 
         return this;
@@ -72,7 +79,37 @@ class PDF {
             // await deleteFromCloud(this.filePath);
             fs.unlinkSync(this.filePath);
         } catch (err) {
-            clearDir(dir, ['.gitkeep']);
+            return;
+        }
+
+        return this;
+    }
+
+    /**
+     * Do BLAKE2s hashing on the PDF file
+     * @param {string} publicKey
+     * @param {string} dest
+     */
+    async hash(publicKey, dest) {
+        addPublicKey(path.basename(dest), publicKey);
+
+        const dir = path.dirname(dest);
+        try {
+            createDir(dir);
+
+            const fileBuffer = fs.readFileSync(this.filePath);
+            const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
+
+            const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
+            const hashByte = blake2s.update(fileBuffer).digest();
+
+            fs.writeFileSync(dest, Buffer.from(hashByte));
+            // await uploadToCloud(dest, path.basename(dest));
+
+            // await deleteFromCloud(this.filePath);
+            fs.unlinkSync(this.filePath);
+        } catch (err) {
+            return;
         }
 
         return this;

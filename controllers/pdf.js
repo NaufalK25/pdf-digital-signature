@@ -4,6 +4,7 @@ const express = require('express');
 const PDF = require('../utils/PDF');
 const { deleteFromCloud, getFilesFromCloud, uploadToCloud } = require('../utils/cloud');
 const { uploadsDir } = require('../utils/constant');
+const { getPublicKey, removePublicKey } = require('../utils/publicKey');
 
 /**
  * Get the root page controller
@@ -32,8 +33,9 @@ const getRoot = async (req, res) => {
             return {
                 name: pdf,
                 url: path.join('uploads', pdf),
-                isEncrypted: pdfBytes.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i]),
-                isHashed: false
+                isEncrypted: pdfBytes.length >= PDF.minPDFBufferLength && pdfBytes.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i]),
+                isHashed: pdfBytes.length < PDF.minPDFBufferLength,
+                publicKey: getPublicKey(pdf)
             };
         });
 
@@ -79,6 +81,21 @@ const decryptPDF = async (req, res) => {
 };
 
 /**
+ * Hash a PDF file controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+const hashPDF = async (req, res) => {
+    const publicKey = req.body.public_key;
+    const file = req.body.hashed_file;
+    const pdf = new PDF(path.join(uploadsDir, file));
+
+    await pdf.hash(publicKey, path.join(uploadsDir, `hashed-${file}`));
+
+    res.redirect('/');
+};
+
+/**
  * Upload a PDF file controller
  * @param {express.Request} req
  * @param {express.Response} res
@@ -99,6 +116,8 @@ const uploadPDF = async (req, res) => {
 const deletePDF = async (req, res) => {
     const file = req.body.deleted_file;
 
+    removePublicKey(file);
+
     // await deleteFromCloud(path.join(uploadsDir, file));
     fs.unlinkSync(path.join(uploadsDir, file));
 
@@ -117,7 +136,12 @@ const deleteAllPDF = async (req, res) => {
 
     const uploadsDirContent = fs.readdirSync(uploadsDir);
 
-    uploadsDirContent.filter(file => path.parse(file).ext === '.pdf').forEach(file => fs.unlinkSync(path.join(uploadsDir, file)));
+    uploadsDirContent
+        .filter(file => path.parse(file).ext === '.pdf')
+        .forEach(file => {
+            removePublicKey(file);
+            fs.unlinkSync(path.join(uploadsDir, file));
+        });
 
     res.redirect('/');
 };
@@ -126,6 +150,7 @@ module.exports = {
     getRoot,
     encryptPDF,
     decryptPDF,
+    hashPDF,
     uploadPDF,
     deletePDF,
     deleteAllPDF

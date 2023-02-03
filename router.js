@@ -1,5 +1,5 @@
 const express = require('express');
-const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, uploadPDF } = require('./controllers/pdf');
+const { decryptPDF, deleteAllPDF, deletePDF, encryptPDF, getRoot, hashPDF, uploadPDF } = require('./controllers/pdf');
 const { uploadPDFSMiddleware } = require('./middlewares/uploadPDFSMiddleware');
 
 const router = express.Router();
@@ -9,6 +9,11 @@ router.delete('/delete', deletePDF);
 router.delete('/delete-all', deleteAllPDF);
 router.post('/encrypt', encryptPDF);
 router.post('/decrypt', decryptPDF);
+router.post('/hash', hashPDF);
 router.get('/', getRoot);
+
+router.get('*', (req, res) => {
+    res.redirect('/');
+});
 
 module.exports = router;
