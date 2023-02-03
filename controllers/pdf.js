@@ -3,7 +3,7 @@ const path = require('path');
 const express = require('express');
 const PDF = require('../utils/PDF');
 const { deleteFromCloud, getFilesFromCloud, uploadToCloud } = require('../utils/cloud');
-const { baseUrl, uploadsDir } = require('../utils/constant');
+const { uploadsDir } = require('../utils/constant');
 
 /**
  * Get the root page controller
@@ -32,7 +32,8 @@ const getRoot = async (req, res) => {
             return {
                 name: pdf,
                 url: path.join('uploads', pdf),
-                isEncrypted: pdfBytes.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i])
+                isEncrypted: pdfBytes.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i]),
+                isHashed: false
             };
         });
 

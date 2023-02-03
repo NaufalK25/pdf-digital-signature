@@ -438,7 +438,4 @@ class AES {
     }
 }
 
-const aes = new AES();
-console.log(aes.keySchedule);
-
 module.exports = AES;
