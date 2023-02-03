@@ -103,7 +103,7 @@ class PDF {
             const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
             const hashByte = blake2s.update(fileBuffer).digest();
 
-            fs.writeFileSync(dest, Buffer.from(hashByte));
+            fs.writeFileSync(dest, hashByte);
             // await uploadToCloud(dest, path.basename(dest));
 
             // await deleteFromCloud(this.filePath);

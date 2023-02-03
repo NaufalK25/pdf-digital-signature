@@ -39,7 +39,13 @@ const getRoot = async (req, res) => {
             };
         });
 
-    res.render('index', { pdfs });
+    res.render('index', {
+        pdfs,
+        flash: {
+            type: req.flash('type') || '',
+            message: req.flash('message') || ''
+        }
+    });
 };
 
 /**
@@ -57,6 +63,9 @@ const encryptPDF = async (req, res) => {
     }
 
     await pdf.encrypt(path.join(uploadsDir, `encrypted-${file}`));
+
+    req.flash('type', 'success');
+    req.flash('message', `Successfully encrypted ${file}`);
 
     res.redirect('/');
 };
@@ -77,6 +86,9 @@ const decryptPDF = async (req, res) => {
 
     await pdf.decrypt(path.join(uploadsDir, `decrypted-${file}`));
 
+    req.flash('type', 'success');
+    req.flash('message', `Successfully decrypted ${file}`);
+
     res.redirect('/');
 };
 
@@ -92,6 +104,32 @@ const hashPDF = async (req, res) => {
 
     await pdf.hash(publicKey, path.join(uploadsDir, `hashed-${file}`));
 
+    req.flash('type', 'success');
+    req.flash('message', `Successfully hashed ${file}`);
+
+    res.redirect('/');
+};
+
+/**
+ * Compare hash of 2 PDF files controller
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+const compareHashPDF = async (req, res) => {
+    const file1 = req.body.file1;
+    const file2 = req.body.file2;
+
+    const pdf1 = fs.readFileSync(path.join(uploadsDir, file1));
+    const pdf2 = fs.readFileSync(path.join(uploadsDir, file2));
+
+    const pdf1Buffer = pdf1.toJSON().data;
+    const pdf2Buffer = pdf2.toJSON().data;
+
+    const isSame = pdf1Buffer.length === pdf2Buffer.length && pdf1Buffer.every((val, i) => val === pdf2Buffer[i]);
+
+    req.flash('type', isSame ? 'success' : 'danger');
+    req.flash('message', `${file1} and ${file2} are ${isSame ? '' : 'not '}the same file(s)`);
+
     res.redirect('/');
 };
 
@@ -105,6 +143,8 @@ const uploadPDF = async (req, res) => {
     //     await uploadToCloud(file.path, file.filename);
     // }
 
+    req.flash('type', 'success');
+    req.flash('message', `Successfully uploaded ${req.files.length} file(s)`);
     res.redirect('/');
 };
 
@@ -121,6 +161,8 @@ const deletePDF = async (req, res) => {
     // await deleteFromCloud(path.join(uploadsDir, file));
     fs.unlinkSync(path.join(uploadsDir, file));
 
+    req.flash('type', 'success');
+    req.flash('message', `Successfully deleted ${file}`);
     res.redirect('/');
 };
 
@@ -143,6 +185,9 @@ const deleteAllPDF = async (req, res) => {
             fs.unlinkSync(path.join(uploadsDir, file));
         });
 
+    req.flash('type', 'success');
+    req.flash('message', `Successfully deleted ${uploadsDirContent.length - 1} file(s)`);
+
     res.redirect('/');
 };
 
@@ -151,6 +196,7 @@ module.exports = {
     encryptPDF,
     decryptPDF,
     hashPDF,
+    compareHashPDF,
     uploadPDF,
     deletePDF,
     deleteAllPDF

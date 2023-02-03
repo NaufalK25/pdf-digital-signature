@@ -39,8 +39,6 @@ const addPublicKey = (filename, publicKey) => {
  */
 const getPublicKey = filename => {
     const jsonContent = getJSONContent();
-    console.log(jsonContent[filename]);
-
     return jsonContent[filename];
 };
 
