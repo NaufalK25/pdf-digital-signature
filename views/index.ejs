@@ -21,18 +21,18 @@
         </a>
     </nav>
 
-    <% if (flash.type.length > 0) { %>
-    <div class="alert alert-<%= flash.type %> alert-dismissible fade show" role="alert">
-        <%= flash.message %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <% } %>
-
     <main class="mb-5 container d-flex flex-column justify-content-center align-items-center">
-        <div class="uploads_container">
+        <% if (flash.type.length > 0) { %>
+        <div class="alert alert-<%= flash.type %> alert-dismissible fade show" role="alert">
+            <%= flash.message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+
+        <div>
             <form action="/uploads" method="POST" enctype="multipart/form-data">
                 <div class="input-group custom-file">
-                    <input type="file" name="files" accept=".pdf" class="form-control" id="uploadFile" aria-describedby="uploadFileAddon" aria-label="Upload" multiple required>
+                    <input type="file" name="files" accept=".pdf" class="form-control" id="uploadFile" aria-describedby="uploadFileAddon" aria-label="Upload" multiple required autofocus>
                     <button class="btn btn-primary" type="submit" id="uploadFileAddon">
                         <span>Upload</span>
                     </button>
@@ -176,7 +176,7 @@
             <h4 class="text-center">Compare PDF Hashes</h4>
             <p class="text-small text-center text-secondary">*Need at least 2 hashed PDFs to compare.</p>
             <form action="/compare-hash" method="POST" class="d-flex compare-pdf-form">
-                <select class="form-select" name="file1" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
+                <select class="form-select" name="file1" title="PDF 1" required <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
                     <option selected disabled>No PDF Selected</option>
                     <% pdfs.forEach(pdf => { %>
                     <% if (pdf.isHashed) { %>
@@ -185,7 +185,7 @@
                     <% }) %>
                 </select>
 
-                <select class="form-select" name="file2" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
+                <select class="form-select" name="file2" title="PDF 2" required <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
                     <option selected disabled>No PDF Selected</option>
                     <% pdfs.forEach(pdf => { %>
                     <% if (pdf.isHashed) { %>
@@ -194,7 +194,9 @@
                     <% }) %>
                 </select>
 
-                <button class="btn btn-outline-info" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>Compare</button>
+                <button class="btn btn-outline-info" type="submit" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
+                    <span>Compare</span>
+                </button>
             </form>
         </div>
 

@@ -102,6 +102,18 @@ const hashPDF = async (req, res) => {
     const file = req.body.hashed_file;
     const pdf = new PDF(path.join(uploadsDir, file));
 
+    if (!publicKey) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please enter a public key');
+        return res.redirect('/');
+    }
+
+    if (publicKey.length <= 0 || publicKey.length > 32) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Public Key must be 1-32 characters long');
+        return res.redirect('/');
+    }
+
     await pdf.hash(publicKey, path.join(uploadsDir, `hashed-${file}`));
 
     req.flash('type', 'success');
@@ -119,16 +131,21 @@ const compareHashPDF = async (req, res) => {
     const file1 = req.body.file1;
     const file2 = req.body.file2;
 
+    if (!file1 || !file2) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please select 2 files to compare');
+        return res.redirect('/');
+    }
+
     const pdf1 = fs.readFileSync(path.join(uploadsDir, file1));
     const pdf2 = fs.readFileSync(path.join(uploadsDir, file2));
 
     const pdf1Buffer = pdf1.toJSON().data;
     const pdf2Buffer = pdf2.toJSON().data;
-
     const isSame = pdf1Buffer.length === pdf2Buffer.length && pdf1Buffer.every((val, i) => val === pdf2Buffer[i]);
 
     req.flash('type', isSame ? 'success' : 'danger');
-    req.flash('message', `${file1} and ${file2} are ${isSame ? '' : 'not '}the same file(s)`);
+    req.flash('message', `${file1} and ${file2} are ${isSame ? '' : 'not '}the same files`);
 
     res.redirect('/');
 };
@@ -142,6 +159,12 @@ const uploadPDF = async (req, res) => {
     // for (const file of req.files) {
     //     await uploadToCloud(file.path, file.filename);
     // }
+
+    if (req.files.length <= 0) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please select one or more files to upload');
+        return res.redirect('/');
+    }
 
     req.flash('type', 'success');
     req.flash('message', `Successfully uploaded ${req.files.length} file(s)`);
