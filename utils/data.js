@@ -54,6 +54,11 @@ const removeData = filename => {
     fs.writeFileSync(jsonPath, JSON.stringify(jsonContent));
 };
 
+/**
+ * Check if data exist in the JSON file
+ * @param {string} filename
+ * @returns
+ */
 const isDataExist = filename => {
     const jsonContent = getJSONContent();
     return !!jsonContent[filename];
