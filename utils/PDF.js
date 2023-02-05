@@ -24,6 +24,10 @@ class PDF {
         this.filePath = filePath;
     }
 
+    /**
+     * @param {string} publicKey
+     * @returns
+     */
     hash(publicKey) {
         const fileBuffer = fs.readFileSync(this.filePath);
 
@@ -37,6 +41,10 @@ class PDF {
         return signature;
     }
 
+    /**
+     * @param {string} privateKey
+     * @returns
+     */
     decrypt(privateKey) {
         const ciphertext = getData(path.basename(this.filePath)).checksum;
         const aes = new AES(privateKey);
@@ -46,7 +54,6 @@ class PDF {
     }
 
     /**
-     * Sign the PDF file
      * @param {string} privateKey
      * @param {string} publicKey
      * @returns
