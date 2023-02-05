@@ -31,4 +31,3 @@ jobs:
       run: npm test
       env:
         AES_KEY: ${{ secrets.AES_KEY }}
-        DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
