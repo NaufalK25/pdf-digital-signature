@@ -1,5 +1,5 @@
-const path = require('path');
 require('dotenv').config();
+const path = require('path');
 
 const port = process.env.PORT || 3000;
 const baseUrl = process.env.BASE_URL || 'http://localhost';

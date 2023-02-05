@@ -57,7 +57,7 @@ class BLAKE2s {
 
     /**
      * @param {number} digestLength
-     * @param {number[]|Uint8Array} keyOrConfig
+     * @param {number[]|Uint8Array|{key?:number[]|Uint8Array;salt?:number[]|Uint8Array;personalization?:number[]|Uint8Array}} keyOrConfig
      */
     constructor(digestLength, keyOrConfig) {
         if (digestLength === undefined) {

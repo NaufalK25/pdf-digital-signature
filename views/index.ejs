@@ -25,7 +25,7 @@
         <% if (flash.type.length > 0) { %>
         <div class="alert alert-<%= flash.type %> alert-dismissible fade show" role="alert">
             <%= flash.message %>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" title="Close"></button>
         </div>
         <% } %>
 
@@ -33,7 +33,7 @@
             <form action="/uploads" method="POST" enctype="multipart/form-data">
                 <div class="input-group custom-file">
                     <input type="file" name="files" accept=".pdf" class="form-control" id="uploadFile" aria-describedby="uploadFileAddon" aria-label="Upload" multiple required autofocus>
-                    <button class="btn btn-primary" type="submit" id="uploadFileAddon">
+                    <button class="btn btn-primary" type="submit" id="uploadFileAddon" title="Upload">
                         <span>Upload</span>
                     </button>
                 </div>
@@ -53,7 +53,7 @@
                 <thead>
                     <tr>
                         <th class="text-center">Name</th>
-                        <th colspan="4" class="text-center">Action</th>
+                        <th colspan="3" class="text-center">Action</th>
                     </tr>
                 </thead>
 
@@ -64,21 +64,16 @@
                             <a href="<%= pdf.url %>" target="_blank" rel="noopener noreferrer" title="<%= pdf.name %>"><%= pdf.name %></a>
                             <% if (pdf.isHashed) { %>
                             <div>
-                                <span class="text-small">Public Key: <%= pdf.publicKey || '-' %></span>
+                                <span class="text-small">Checksum: <%= pdf.data.checksum || '-' %></span>
+                            </div>
+                            <div>
+                                <span class="text-small">Public Key: <%= pdf.data.publicKey || '-' %></span>
                             </div>
                             <% } %>
-                            <div class="<%= !pdf.isEncrypted && 'visually-hidden' %>">
-                                <span class="badge text-bg-success">Encrypted</span>
-                            </div>
-
-                            <div class="<%= !pdf.isHashed && 'visually-hidden' %>">
-                                <span class="badge text-bg-warning">Hashed</span>
-                            </div>
-
                         </td>
 
                         <td>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#preview<%= idx %>">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#preview<%= idx %>" title="Preview">
                                 Preview
                             </button>
 
@@ -87,7 +82,7 @@
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="preview<%= idx %>Label">Preview for <%= pdf.name %></h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                                         </div>
 
                                         <div class="modal-body ratio ratio-1x1">
@@ -95,8 +90,8 @@
                                         </div>
 
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                                            <a href="<%= pdf.url %>" class="btn btn-success text-decoration-none" download>Download</a>
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Close</button>
+                                            <a href="<%= pdf.url %>" class="btn btn-success text-decoration-none" download title="Download">Download</a>
                                         </div>
                                     </div>
                                 </div>
@@ -104,51 +99,39 @@
                         </td>
 
                         <td>
-                            <% if (!pdf.isEncrypted) { %>
-                            <form action="/encrypt" method="POST">
-                                <input type="hidden" name="encrypted_file" value="<%= pdf.name %>">
-                                <button type="submit" class="btn btn-outline-success" title="Encrypt" <%= pdf.isHashed && 'disabled' %>>
-                                    <span>Encrypt</span>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sign<%= idx %>" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">
+                                    <%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>
                                 </button>
-                            </form>
-                            <% } %>
+                            </div>
 
-                            <% if (pdf.isEncrypted) { %>
-                            <form action="/decrypt" method="POST">
-                                <input type="hidden" name="decrypted_file" value="<%= pdf.name %>">
-                                <button type="submit" class="btn btn-outline-success" title="Decrypt" <%= pdf.isHashed && 'disabled' %>>
-                                    <span>Decrypt</span>
-                                </button>
-                            </form>
-                            <% } %>
-                        </td>
-
-                        <td>
-                            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#hash<%= idx %>" <%= pdf.isHashed && 'disabled' %>>
-                                Hash
-                            </button>
-
-                            <div class="modal fade" id="hash<%= idx %>" tabindex="-1" aria-labelledby="hash<%= idx %>Label" aria-hidden="true">
+                            <div class="modal fade" id="sign<%= idx %>" tabindex="-1" aria-labelledby="sign<%= idx %>Label" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="hash<%= idx %>Label">Hash for <%= pdf.name %></h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <h5 class="modal-title" id="sign<%= idx %>Label">Sign <%= pdf.name %></h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                                         </div>
 
-                                        <form action="/hash" method="POST">
-                                            <input type="hidden" name="hashed_file" value="<%= pdf.name %>">
+                                        <form action="/sign" method="POST">
+                                            <input type="hidden" name="signed_pdf" value="<%= pdf.name %>">
 
-                                            <div class="p-2 d-flex flex-column hash-input-group">
-                                                <label for="public_key<%= pdf.name %>" class="form-label pointer">Public Key</label>
+                                            <div class="p-2 d-flex flex-column sign-input-group">
+                                                <label for="private_key<%= pdf.name %>">Private Key For Encryption</label>
+                                                <input type="text" class="form-control" name="private_key" id="private_key<%= pdf.name %>" minlength="1" maxlength="16" required>
+                                                <p class="text-small text-secondary">Note: Private Key is recommended to be 1-16 characters long.</p>
+                                            </div>
+
+                                            <div class="p-2 d-flex flex-column sign-input-group">
+                                                <label for="public_key<%= pdf.name %>">Public Key For Hash</label>
                                                 <input type="text" class="form-control" name="public_key" id="public_key<%= pdf.name %>" minlength="1" maxlength="32" required>
                                                 <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
                                             </div>
 
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-outline-warning" title="Hash">
-                                                    <span>Hash</span>
+                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Close</button>
+                                                <button type="submit" class="btn btn-outline-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">
+                                                    <span><%= pdf.isHashed ? 'Re-Sign' : 'Sign' %></span>
                                                 </button>
                                             </div>
                                         </form>
@@ -159,7 +142,7 @@
 
                         <td>
                             <form action="/delete?_method=DELETE" method="POST">
-                                <input type="hidden" name="deleted_file" value="<%= pdf.name %>">
+                                <input type="hidden" name="deleted_pdf" value="<%= pdf.name %>">
                                 <button type="submit" class="btn btn-outline-danger" title="Delete">
                                     <span>Delete</span>
                                 </button>
@@ -174,29 +157,46 @@
 
         <div>
             <h4 class="text-center">Compare PDF Hashes</h4>
-            <p class="text-small text-center text-secondary">*Need at least 2 hashed PDFs to compare.</p>
-            <form action="/compare-hash" method="POST" class="d-flex compare-pdf-form">
-                <select class="form-select" name="file1" title="PDF 1" required <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
-                    <option selected disabled>No PDF Selected</option>
-                    <% pdfs.forEach(pdf => { %>
-                    <% if (pdf.isHashed) { %>
-                    <option value="<%= pdf.name %>"><%= pdf.name %></option>
-                    <% } %>
-                    <% }) %>
-                </select>
+            <p class="text-small text-center text-secondary">*Need at least 1 hashed PDFs to compare.</p>
+            <form action="/compare-hash" method="POST" class="d-flex flex-column compare-pdf-form" enctype="multipart/form-data">
+                <div class="d-flex sign-input-group">
+                    <div>
+                        <label for="hashed_pdf">Hashed PDF</label>
+                        <select class="form-select" name="hashed_pdf" id="hashed_pdf" title="Hashed PDF" required <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
+                            <option selected disabled>No PDF Selected</option>
+                            <% pdfs.forEach(pdf => { %>
+                            <% if (pdf.isHashed) { %>
+                            <option value="<%= pdf.name %>"><%= pdf.name %></option>
+                            <% } %>
+                            <% }) %>
+                        </select>
+                    </div>
 
-                <select class="form-select" name="file2" title="PDF 2" required <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
-                    <option selected disabled>No PDF Selected</option>
-                    <% pdfs.forEach(pdf => { %>
-                    <% if (pdf.isHashed) { %>
-                    <option value="<%= pdf.name %>"><%= pdf.name %></option>
-                    <% } %>
-                    <% }) %>
-                </select>
+                    <div>
+                        <label for="private_key">Private Key For Encryption</label>
+                        <input type="text" class="form-control" name="private_key" id="private_key" minlength="1" maxlength="16" required>
+                        <p class="text-small text-secondary">Note: Private Key is recommended to be 1-16 characters long.</p>
+                    </div>
+                </div>
 
-                <button class="btn btn-outline-info" type="submit" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
-                    <span>Compare</span>
-                </button>
+                <div class="d-flex sign-input-group">
+                    <div>
+                        <label for="normal_pdf">Normal PDF</label>
+                        <input type="file" class="form-control" name="normal_pdf" id="normal_pdf" accept=".pdf" required>
+                    </div>
+
+                    <div>
+                        <label for="public_key">Public Key For Hash</label>
+                        <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required>
+                        <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button class="btn btn-outline-info" type="submit" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %> title="Compare">
+                        <span>Compare</span>
+                    </button>
+                </div>
             </form>
         </div>
 

@@ -2,10 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const AES = require('./AES');
 const BLAKE2s = require('./BLAKE2s');
-const { deleteFromCloud, uploadToCloud } = require('./cloud');
-const { clearDir, createDir } = require('./file');
-const { decToText, textToDec } = require('./converter');
-const { addPublicKey } = require('./publicKey');
+const { textToDec } = require('./converter');
+const { addData, getData } = require('./data');
 
 class PDF {
     /**
@@ -24,93 +22,52 @@ class PDF {
      */
     constructor(filePath = '') {
         this.filePath = filePath;
-        this.aes = new AES();
-        this.paddingLength = 0;
+    }
+
+    hash(publicKey) {
+        const fileBuffer = fs.readFileSync(this.filePath);
+
+        publicKey = publicKey.padEnd(32, ' ');
+
+        const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
+
+        const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
+        const signature = blake2s.update(fileBuffer).hexDigest();
+
+        return signature;
+    }
+
+    decrypt(privateKey) {
+        const ciphertext = getData(path.basename(this.filePath)).checksum;
+        const aes = new AES(privateKey);
+        const decryptedSignature = aes.decrypt(ciphertext);
+
+        return decryptedSignature;
     }
 
     /**
-     * Do AES encryption on the PDF file
-     * @param {string} dest
-     * @returns
-     */
-    async encrypt(dest) {
-        const dir = path.dirname(dest);
-        try {
-            createDir(dir);
-
-            const fileBuffer = fs.readFileSync(this.filePath);
-
-            const plaintext = fileBuffer.toJSON().data.map(decToText).join('');
-            const ciphertext = this.aes.encrypt(plaintext);
-            const encryptedBuffer = Buffer.from([...ciphertext].map(textToDec));
-            this.paddingLength = this.aes.paddingLength;
-
-            fs.writeFileSync(dest, encryptedBuffer);
-            // await uploadToCloud(dest, path.basename(dest));
-
-            // await deleteFromCloud(this.filePath);
-            fs.unlinkSync(this.filePath);
-        } catch (err) {
-            return;
-        }
-
-        return this;
-    }
-
-    /**
-     * Do AES decryption on the PDF file
-     * @param {string} dest
-     * @returns
-     */
-    async decrypt(dest) {
-        const dir = path.dirname(dest);
-        try {
-            createDir(dir);
-
-            const fileBuffer = fs.readFileSync(this.filePath);
-
-            const ciphertext = fileBuffer.toJSON().data.map(decToText).join('');
-            const plaintext = this.aes.decrypt(ciphertext, this.paddingLength);
-            const decryptedBuffer = Buffer.from([...plaintext].map(textToDec));
-
-            fs.writeFileSync(dest, decryptedBuffer);
-            // await uploadToCloud(dest, path.basename(dest));
-
-            // await deleteFromCloud(this.filePath);
-            fs.unlinkSync(this.filePath);
-        } catch (err) {
-            return;
-        }
-
-        return this;
-    }
-
-    /**
-     * Do BLAKE2s hashing on the PDF file
+     * Sign the PDF file
+     * @param {string} privateKey
      * @param {string} publicKey
-     * @param {string} dest
+     * @returns
      */
-    async hash(publicKey, dest) {
-        addPublicKey(path.basename(dest), publicKey);
+    sign(privateKey, publicKey) {
+        const fileBuffer = fs.readFileSync(this.filePath);
 
-        const dir = path.dirname(dest);
-        try {
-            createDir(dir);
+        publicKey = publicKey.padEnd(32, ' ');
 
-            const fileBuffer = fs.readFileSync(this.filePath);
-            const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
+        const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
 
-            const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
-            const hashByte = blake2s.update(fileBuffer).digest();
+        const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
+        const signature = blake2s.update(fileBuffer).hexDigest();
 
-            fs.writeFileSync(dest, hashByte);
-            // await uploadToCloud(dest, path.basename(dest));
+        const aes = new AES(privateKey);
+        const encryptedSignature = aes.encrypt(signature);
 
-            // await deleteFromCloud(this.filePath);
-            fs.unlinkSync(this.filePath);
-        } catch (err) {
-            return;
-        }
+        addData(path.basename(this.filePath), {
+            checksum: encryptedSignature,
+            publicKey
+        });
 
         return this;
     }

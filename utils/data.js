@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { rootDir } = require('./constant');
 
-const jsonPath = path.join(rootDir, 'data', 'publicKey.json');
+const jsonPath = path.join(rootDir, 'data', 'data.json');
 
 /**
  * Get JSON file content as object
@@ -20,33 +20,33 @@ const getJSONContent = () => {
 };
 
 /**
- * Add a public key to the JSON file
+ * Add a data to the JSON file
  * @param {string} filename
- * @param {string} publicKey
+ * @param {{ checksum: string, publicKey: string }} data
  */
-const addPublicKey = (filename, publicKey) => {
+const addData = (filename, data) => {
     const jsonContent = getJSONContent();
 
-    jsonContent[filename] = publicKey;
+    jsonContent[filename] = data;
 
     fs.writeFileSync(jsonPath, JSON.stringify(jsonContent));
 };
 
 /**
- * Get a public key from the JSON file
+ * Get data from the JSON file
  * @param {string} filename
  * @returns
  */
-const getPublicKey = filename => {
+const getData = filename => {
     const jsonContent = getJSONContent();
     return jsonContent[filename];
 };
 
 /**
- * Remove a public key from the JSON file
+ * Remove data from the JSON file
  * @param {string} filename
  */
-const removePublicKey = filename => {
+const removeData = filename => {
     const jsonContent = getJSONContent();
 
     delete jsonContent[filename];
@@ -54,8 +54,14 @@ const removePublicKey = filename => {
     fs.writeFileSync(jsonPath, JSON.stringify(jsonContent));
 };
 
+const isDataExist = filename => {
+    const jsonContent = getJSONContent();
+    return !!jsonContent[filename];
+};
+
 module.exports = {
-    addPublicKey,
-    getPublicKey,
-    removePublicKey
+    addData,
+    getData,
+    removeData,
+    isDataExist
 };

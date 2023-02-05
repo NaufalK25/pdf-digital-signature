@@ -2,42 +2,25 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const PDF = require('../utils/PDF');
-const { deleteFromCloud, getFilesFromCloud, uploadToCloud } = require('../utils/cloud');
 const { uploadsDir } = require('../utils/constant');
-const { getPublicKey, removePublicKey } = require('../utils/publicKey');
+const { getData, isDataExist, removeData } = require('../utils/data');
 
 /**
  * Get the root page controller
  * @param {express.Request} req
  * @param {express.Response} res
  */
-const getRoot = async (req, res) => {
-    // const pdfs = await getFilesFromCloud();
-
-    // pdfs.sort((a, b) => (a.name > b.name ? -1 : 1)).forEach(pdf => {
-    //     const filePath = path.join(uploadsDir, pdf.name);
-    //     const file = fs.readFileSync(filePath);
-    //     const fileBufferArr = file.toJSON().data;
-    //     pdf.isEncrypted = fileBufferArr.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i]);
-    // });
-
+const getRoot = (req, res) => {
     const pdfs = fs
         .readdirSync(uploadsDir)
         .filter(pdf => path.parse(pdf).ext === '.pdf')
         .sort((a, b) => (a > b ? -1 : 1))
-        .map(pdf => {
-            const pdfPath = path.join(uploadsDir, pdf);
-            const pdfBuffer = fs.readFileSync(pdfPath);
-            const pdfBytes = pdfBuffer.toJSON().data;
-
-            return {
-                name: pdf,
-                url: path.join('uploads', pdf),
-                isEncrypted: pdfBytes.length >= PDF.minPDFBufferLength && pdfBytes.slice(0, 7).some((val, i) => val !== PDF.validPDFBuffer[i]),
-                isHashed: pdfBytes.length < PDF.minPDFBufferLength,
-                publicKey: getPublicKey(pdf)
-            };
-        });
+        .map(pdf => ({
+            name: pdf,
+            url: path.join('uploads', pdf),
+            isHashed: isDataExist(pdf),
+            data: getData(pdf)
+        }));
 
     res.render('index', {
         pdfs,
@@ -49,58 +32,20 @@ const getRoot = async (req, res) => {
 };
 
 /**
- * Encrypt a PDF file controller
+ * Sign PDF controller
  * @param {express.Request} req
  * @param {express.Response} res
  */
-const encryptPDF = async (req, res) => {
-    let file = req.body.encrypted_file;
-
-    const pdf = new PDF(path.join(uploadsDir, file));
-
-    if (file.startsWith('decrypted-')) {
-        file = file.replace('decrypted-', '');
-    }
-
-    await pdf.encrypt(path.join(uploadsDir, `encrypted-${file}`));
-
-    req.flash('type', 'success');
-    req.flash('message', `Successfully encrypted ${file}`);
-
-    res.redirect('/');
-};
-
-/**
- * Decrypt a PDF file controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const decryptPDF = async (req, res) => {
-    let file = req.body.decrypted_file;
-
-    const pdf = new PDF(path.join(uploadsDir, file));
-
-    if (file.startsWith('encrypted-')) {
-        file = file.replace('encrypted-', '');
-    }
-
-    await pdf.decrypt(path.join(uploadsDir, `decrypted-${file}`));
-
-    req.flash('type', 'success');
-    req.flash('message', `Successfully decrypted ${file}`);
-
-    res.redirect('/');
-};
-
-/**
- * Hash a PDF file controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const hashPDF = async (req, res) => {
+const signPDF = (req, res) => {
+    const privateKey = req.body.private_key;
     const publicKey = req.body.public_key;
-    const file = req.body.hashed_file;
-    const pdf = new PDF(path.join(uploadsDir, file));
+    const pdf = req.body.signed_pdf;
+
+    if (!privateKey) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please enter a private key');
+        return res.redirect('/');
+    }
 
     if (!publicKey) {
         req.flash('type', 'danger');
@@ -114,10 +59,10 @@ const hashPDF = async (req, res) => {
         return res.redirect('/');
     }
 
-    await pdf.hash(publicKey, path.join(uploadsDir, `hashed-${file}`));
+    new PDF(path.join(uploadsDir, pdf)).sign(privateKey, publicKey);
 
     req.flash('type', 'success');
-    req.flash('message', `Successfully hashed ${file}`);
+    req.flash('message', `File ${pdf} has been signed`);
 
     res.redirect('/');
 };
@@ -127,25 +72,33 @@ const hashPDF = async (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  */
-const compareHashPDF = async (req, res) => {
-    const file1 = req.body.file1;
-    const file2 = req.body.file2;
+const compareHashPDF = (req, res) => {
+    const privateKey = req.body.private_key;
+    const publicKey = req.body.public_key;
+    const hashedPDF = req.body.hashed_pdf;
+    const normalPDF = req.file;
 
-    if (!file1 || !file2) {
+    if (!hashedPDF) {
         req.flash('type', 'danger');
-        req.flash('message', 'Please select 2 files to compare');
+        req.flash('message', 'Please select a hashed PDF file');
         return res.redirect('/');
     }
 
-    const pdf1 = fs.readFileSync(path.join(uploadsDir, file1));
-    const pdf2 = fs.readFileSync(path.join(uploadsDir, file2));
+    if (!normalPDF) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please upload a normal PDF file');
+        return res.redirect('/');
+    }
 
-    const pdf1Buffer = pdf1.toJSON().data;
-    const pdf2Buffer = pdf2.toJSON().data;
-    const isSame = pdf1Buffer.length === pdf2Buffer.length && pdf1Buffer.every((val, i) => val === pdf2Buffer[i]);
+    const checksumHashedPDF = new PDF(path.join(uploadsDir, hashedPDF)).decrypt(privateKey);
+    const checksumNormalPDF = new PDF(normalPDF.path).hash(publicKey);
+
+    const isSame = checksumHashedPDF === checksumNormalPDF;
 
     req.flash('type', isSame ? 'success' : 'danger');
-    req.flash('message', `${file1} and ${file2} are ${isSame ? '' : 'not '}the same files`);
+    req.flash('message', `${hashedPDF} and ${normalPDF.filename} are ${isSame ? '' : 'not '}the same files`);
+
+    fs.unlinkSync(normalPDF.path);
 
     res.redirect('/');
 };
@@ -155,11 +108,7 @@ const compareHashPDF = async (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  */
-const uploadPDF = async (req, res) => {
-    // for (const file of req.files) {
-    //     await uploadToCloud(file.path, file.filename);
-    // }
-
+const uploadPDF = (req, res) => {
     if (req.files.length <= 0) {
         req.flash('type', 'danger');
         req.flash('message', 'Please select one or more files to upload');
@@ -176,16 +125,15 @@ const uploadPDF = async (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  */
-const deletePDF = async (req, res) => {
-    const file = req.body.deleted_file;
+const deletePDF = (req, res) => {
+    const pdf = req.body.deleted_pdf;
 
-    removePublicKey(file);
+    removeData(pdf);
 
-    // await deleteFromCloud(path.join(uploadsDir, file));
-    fs.unlinkSync(path.join(uploadsDir, file));
+    fs.unlinkSync(path.join(uploadsDir, pdf));
 
     req.flash('type', 'success');
-    req.flash('message', `Successfully deleted ${file}`);
+    req.flash('message', `Successfully deleted ${pdf}`);
     res.redirect('/');
 };
 
@@ -194,18 +142,14 @@ const deletePDF = async (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  */
-const deleteAllPDF = async (req, res) => {
-    // const pdfs = await getFilesFromCloud();
-
-    // pdfs.forEach(async pdf => await deleteFromCloud(path.join(uploadsDir, pdf.name)));
-
+const deleteAllPDF = (req, res) => {
     const uploadsDirContent = fs.readdirSync(uploadsDir);
 
     uploadsDirContent
         .filter(file => path.parse(file).ext === '.pdf')
-        .forEach(file => {
-            removePublicKey(file);
-            fs.unlinkSync(path.join(uploadsDir, file));
+        .forEach(pdf => {
+            removeData(pdf);
+            fs.unlinkSync(path.join(uploadsDir, pdf));
         });
 
     req.flash('type', 'success');
@@ -216,9 +160,7 @@ const deleteAllPDF = async (req, res) => {
 
 module.exports = {
     getRoot,
-    encryptPDF,
-    decryptPDF,
-    hashPDF,
+    signPDF,
     compareHashPDF,
     uploadPDF,
     deletePDF,

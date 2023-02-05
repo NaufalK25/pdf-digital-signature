@@ -88,19 +88,9 @@ class AES {
         [0x0b, 0x0d, 0x09, 0x0e]
     ];
 
-    constructor() {
-        this.key = this.padKey(process.env.AES_KEY);
+    constructor(key = this.padKey(process.env.AES_KEY)) {
+        this.key = this.padKey(key);
         this.keySchedule = this.keyExpansion();
-        this.paddingLength = 0;
-    }
-
-    /**
-     * Pads the string to 16 characters
-     * @param {string} str
-     * @returns
-     */
-    pad(str) {
-        return str.padEnd(16, ' ');
     }
 
     /**
@@ -110,7 +100,7 @@ class AES {
      */
     padKey(key) {
         if (key.length < 16) {
-            return this.pad(key);
+            return key.padEnd(16, ' ');
         }
 
         if (key.length > 16) {
@@ -296,17 +286,16 @@ class AES {
      * @returns
      */
     encrypt(plaintext) {
-        return plaintext
-            .match(/[\s\S]{1,16}/g)
+        const plainArr = [...plaintext].map(char => char);
+
+        const plainArr16 = [];
+        for (let i = 0; i < plainArr.length; i += 16) {
+            plainArr16.push(plainArr.slice(i, i + 16).join(''));
+        }
+
+        return plainArr16
             .map(block => {
-                const paddedBlock = this.pad(block);
-
-                const paddingLength = paddedBlock.length - block.length;
-                if (paddingLength > 0) {
-                    this.paddingLength = paddingLength;
-                }
-
-                const initialAddRoundKeyResult = this.initialAddRoundKeyRound(paddedBlock);
+                const initialAddRoundKeyResult = this.initialAddRoundKeyRound(block);
                 let roundResult = initialAddRoundKeyResult;
 
                 for (let i = 1; i <= 10; i++) {
@@ -408,10 +397,9 @@ class AES {
     /**
      * Decrypts a ciphertext using the AES algorithm
      * @param {string} ciphertext
-     * @param {number} paddingLength
      * @returns
      */
-    decrypt(ciphertext, paddingLength = this.paddingLength) {
+    decrypt(ciphertext) {
         const cipherArr = [...ciphertext].map(char => char);
 
         const cipherArr16 = [];
@@ -419,7 +407,7 @@ class AES {
             cipherArr16.push(cipherArr.slice(i, i + 16).join(''));
         }
 
-        const decryptedText = cipherArr16
+        return cipherArr16
             .map(block => {
                 if (block.length % 16 !== 0) {
                     throw new Error('Ciphertext must be a multiple of 16 characters');
@@ -433,8 +421,6 @@ class AES {
                 return new Matrix(roundResult).transpose().convertValue('hex', 'text').flat().matrix.join('');
             })
             .join('');
-
-        return decryptedText.slice(0, decryptedText.length - paddingLength);
     }
 }
 

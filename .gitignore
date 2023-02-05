@@ -15,7 +15,7 @@ coverage/
 # Misc
 *.pdf
 temp/
-data/publicKey.json
+data/*
 !tests/**/*.pdf
 public/**/*.css
 public/**/*.js
