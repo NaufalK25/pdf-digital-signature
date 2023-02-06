@@ -36,12 +36,11 @@ class MatrixColumn {
     xor(otherColumns) {
         const result = [];
         for (let i = 0; i < this.column.length; i++) {
-            let binRow = '';
-            for (let j = 0; j < otherColumns.length; j++) {
-                binRow += this.column[i] ^ otherColumns[j].column[i];
+            let bin = '';
+            for (let j = 0; j < this.column[i].length; j++) {
+                bin += otherColumns.reduce((acc, otherColumn) => acc ^ otherColumn.column[i][j], this.column[i][j]);
             }
-
-            result.push(binRow);
+            result.push(bin);
         }
 
         return new MatrixColumn(result);
