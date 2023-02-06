@@ -146,9 +146,7 @@ class AES {
         let roundKey = 1;
 
         keySchedule.forEach((_, index) => {
-            const ignoredIndex = [0, 1, 2, 3];
-
-            if (ignoredIndex.includes(index)) {
+            if (index < 4) {
                 return;
             } else if (index % 4 === 0) {
                 const lastColOfMatrix = new MatrixColumn(keySchedule[index - 1]).shiftUp().column.map(this.subBytes);
