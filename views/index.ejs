@@ -162,7 +162,7 @@
                 <div class="d-flex sign-input-group">
                     <div>
                         <label for="hashed_pdf">Hashed PDF</label>
-                        <select class="form-select" name="hashed_pdf" id="hashed_pdf" title="Hashed PDF" required <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %>>
+                        <select class="form-select" name="hashed_pdf" id="hashed_pdf" title="Hashed PDF" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
                             <option selected disabled>No PDF Selected</option>
                             <% pdfs.forEach(pdf => { %>
                             <% if (pdf.isHashed) { %>
@@ -174,7 +174,7 @@
 
                     <div>
                         <label for="private_key">Private Key For Decryption</label>
-                        <input type="text" class="form-control" name="private_key" id="private_key" minlength="1" maxlength="16" required>
+                        <input type="text" class="form-control" name="private_key" id="private_key" minlength="1" maxlength="16" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
                         <p class="text-small text-secondary">Note: Private Key is recommended to be 1-16 characters long.</p>
                     </div>
                 </div>
@@ -182,18 +182,18 @@
                 <div class="d-flex sign-input-group">
                     <div>
                         <label for="normal_pdf">Normal PDF</label>
-                        <input type="file" class="form-control" name="normal_pdf" id="normal_pdf" accept=".pdf" required>
+                        <input type="file" class="form-control" name="normal_pdf" id="normal_pdf" accept=".pdf" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
                     </div>
 
                     <div>
                         <label for="public_key">Public Key For Hash</label>
-                        <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required>
+                        <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
                         <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
                     </div>
                 </div>
 
                 <div class="text-center">
-                    <button class="btn btn-outline-info" type="submit" <%= pdfs.filter(pdf => pdf.isHashed).length < 2 && 'disabled' %> title="Compare">
+                    <button class="btn btn-outline-info" type="submit" <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %> title="Compare">
                         <span>Compare</span>
                     </button>
                 </div>
