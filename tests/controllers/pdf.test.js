@@ -2,6 +2,19 @@ const fs = require('fs');
 const PDF = require('../../utils/PDF');
 const { compareHashPDF, deleteAllPDF, deletePDF, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
 
+jest.mock('../../utils/data', () => {
+    return {
+        removeData: jest.fn(),
+        getData: jest.fn().mockReturnValue({
+            checksum: 'test',
+            publicKey: 'test'
+        }),
+        isDataExist: jest.fn().mockReturnValue(true)
+    };
+});
+
+const data = require('../../utils/data');
+
 const mockRequest = ({ file, files, flash, body }) => ({
     file,
     files,
@@ -30,20 +43,29 @@ test('getRoot Controller', () => {
             {
                 name: 'test3.pdf',
                 url: 'uploads\\test3.pdf',
-                isHashed: false,
-                data: undefined
+                isHashed: true,
+                data: {
+                    checksum: 'test',
+                    publicKey: 'test'
+                }
             },
             {
                 name: 'test2.pdf',
                 url: 'uploads\\test2.pdf',
-                isHashed: false,
-                data: undefined
+                isHashed: true,
+                data: {
+                    checksum: 'test',
+                    publicKey: 'test'
+                }
             },
             {
                 name: 'test.pdf',
                 url: 'uploads\\test.pdf',
-                isHashed: false,
-                data: undefined
+                isHashed: true,
+                data: {
+                    checksum: 'test',
+                    publicKey: 'test'
+                }
             }
         ],
         flash: {
@@ -265,6 +287,7 @@ describe('uploadPDF Controller', () => {
 
 test('deletePDF Controller', () => {
     fs.unlinkSync = jest.fn();
+    removeData = jest.fn();
 
     const req = mockRequest({
         body: { deleted_pdf: 'test.pdf' },
