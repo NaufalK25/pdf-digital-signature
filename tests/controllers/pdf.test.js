@@ -52,7 +52,7 @@ test('getRoot Controller', () => {
             },
             {
                 name: 'test2.pdf',
-                url: 'uploads\\test2.pdf',
+                url: `uploads${path.sep}test2.pdf`,
                 isHashed: true,
                 data: {
                     checksum: 'test',
@@ -61,7 +61,7 @@ test('getRoot Controller', () => {
             },
             {
                 name: 'test.pdf',
-                url: 'uploads\\test.pdf',
+                url: `uploads${path.sep}test.pdf`,
                 isHashed: true,
                 data: {
                     checksum: 'test',
