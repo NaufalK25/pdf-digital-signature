@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const PDF = require('../../utils/PDF');
 const { compareHashPDF, deleteAllPDF, deletePDF, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
 
@@ -42,7 +43,7 @@ test('getRoot Controller', () => {
         pdfs: [
             {
                 name: 'test3.pdf',
-                url: 'uploads\\test3.pdf',
+                url: `uploads${path.sep}test3.pdf`,
                 isHashed: true,
                 data: {
                     checksum: 'test',
