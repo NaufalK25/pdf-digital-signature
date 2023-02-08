@@ -96,7 +96,7 @@ const compareHashPDF = (req, res) => {
     const isSame = checksumHashedPDF === checksumNormalPDF;
 
     req.flash('type', isSame ? 'success' : 'danger');
-    req.flash('message', `${hashedPDF} and ${normalPDF.filename} are ${isSame ? '' : 'not '}the same files`);
+    req.flash('message', `${hashedPDF} and ${normalPDF.filename} are ${isSame ? '' : 'not '}the same file`);
 
     fs.unlinkSync(normalPDF.path);
 
@@ -129,7 +129,6 @@ const deletePDF = (req, res) => {
     const pdf = req.body.deleted_pdf;
 
     removeData(pdf);
-
     fs.unlinkSync(path.join(uploadsDir, pdf));
 
     req.flash('type', 'success');

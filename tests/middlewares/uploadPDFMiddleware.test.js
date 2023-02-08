@@ -1,4 +1,4 @@
-const { destination, filename } = require('../../middlewares/uploadPDFSMiddleware');
+const { destination, filename } = require('../../middlewares/uploadPDFMiddleware');
 
 describe('destination', () => {
     test('success', () => {
