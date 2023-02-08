@@ -284,7 +284,7 @@ class AES {
      * @returns
      */
     encrypt(plaintext) {
-        const plainArr = [...plaintext].map(char => char);
+        const plainArr = [...plaintext];
 
         const plainArr16 = [];
         for (let i = 0; i < plainArr.length; i += 16) {
@@ -293,6 +293,10 @@ class AES {
 
         return plainArr16
             .map(block => {
+                if (block.length % 16 !== 0) {
+                    throw new Error('Plaintext must be a multiple of 16 characters');
+                }
+
                 const initialAddRoundKeyResult = this.initialAddRoundKeyRound(block);
                 let roundResult = initialAddRoundKeyResult;
 
@@ -398,7 +402,7 @@ class AES {
      * @returns
      */
     decrypt(ciphertext) {
-        const cipherArr = [...ciphertext].map(char => char);
+        const cipherArr = [...ciphertext];
 
         const cipherArr16 = [];
         for (let i = 0; i < cipherArr.length; i += 16) {

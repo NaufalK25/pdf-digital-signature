@@ -2,13 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { rootDir } = require('./constant');
 
-const jsonPath = path.join(rootDir, 'data', 'data.json');
+const defaultJSONPath = path.join(rootDir, 'data', 'data.json');
 
 /**
  * Get JSON file content as object
+ * @param {string} jsonPath
  * @returns
  */
-const getJSONContent = () => {
+const getJSONContent = (jsonPath = defaultJSONPath) => {
     if (!fs.existsSync(jsonPath)) {
         fs.writeFileSync(jsonPath, '{}');
     }
@@ -23,9 +24,10 @@ const getJSONContent = () => {
  * Add a data to the JSON file
  * @param {string} filename
  * @param {{ checksum: string, publicKey: string }} data
+ * @param {string} jsonPath
  */
-const addData = (filename, data) => {
-    const jsonContent = getJSONContent();
+const addData = (filename, data, jsonPath = defaultJSONPath) => {
+    const jsonContent = getJSONContent(jsonPath);
 
     jsonContent[filename] = data;
 
@@ -35,19 +37,20 @@ const addData = (filename, data) => {
 /**
  * Get data from the JSON file
  * @param {string} filename
- * @returns
+ * @returns {{ checksum: string, publicKey: string }}
  */
-const getData = filename => {
-    const jsonContent = getJSONContent();
+const getData = (filename, jsonPath = defaultJSONPath) => {
+    const jsonContent = getJSONContent(jsonPath);
     return jsonContent[filename];
 };
 
 /**
  * Remove data from the JSON file
  * @param {string} filename
+ * @param {string} jsonPath
  */
-const removeData = filename => {
-    const jsonContent = getJSONContent();
+const removeData = (filename, jsonPath = defaultJSONPath) => {
+    const jsonContent = getJSONContent(jsonPath);
 
     delete jsonContent[filename];
 
@@ -59,8 +62,8 @@ const removeData = filename => {
  * @param {string} filename
  * @returns
  */
-const isDataExist = filename => {
-    const jsonContent = getJSONContent();
+const isDataExist = (filename, jsonPath = defaultJSONPath) => {
+    const jsonContent = getJSONContent(jsonPath);
     return !!jsonContent[filename];
 };
 
