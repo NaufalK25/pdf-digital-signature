@@ -6,10 +6,10 @@ const { addData, getData, isDataExist, removeData } = require('../../utils/data'
 test('json file exists', () => {
     const jsonPath = path.join(rootDir, 'tests', 'data.json');
 
-    expect(isDataExist('test.pdf', jsonPath)).toBe(false);
+    expect(isDataExist('test-data.pdf', jsonPath)).toBe(false);
 
     addData(
-        'test.pdf',
+        'test-data.pdf',
         {
             checksum: 'test',
             publicKey: 'test'
@@ -17,26 +17,26 @@ test('json file exists', () => {
         jsonPath
     );
 
-    const data = getData('test.pdf', jsonPath);
+    const data = getData('test-data.pdf', jsonPath);
 
-    expect(isDataExist('test.pdf', jsonPath)).toBe(true);
+    expect(isDataExist('test-data.pdf', jsonPath)).toBe(true);
     expect(data).toEqual({
         checksum: 'test',
         publicKey: 'test'
     });
 
-    removeData('test.pdf', jsonPath);
+    removeData('test-data.pdf', jsonPath);
 
-    expect(isDataExist('test.pdf', jsonPath)).toBe(false);
+    expect(isDataExist('test-data.pdf', jsonPath)).toBe(false);
 });
 
 test('json file does not exist', () => {
     const jsonPath = path.join(rootDir, 'tests', 'data2.json');
 
-    expect(isDataExist('test.pdf', jsonPath)).toBe(false);
+    expect(isDataExist('test-data.pdf', jsonPath)).toBe(false);
 
     addData(
-        'test.pdf',
+        'test-data.pdf',
         {
             checksum: 'test',
             publicKey: 'test'
@@ -44,17 +44,17 @@ test('json file does not exist', () => {
         jsonPath
     );
 
-    const data = getData('test.pdf', jsonPath);
+    const data = getData('test-data.pdf', jsonPath);
 
-    expect(isDataExist('test.pdf', jsonPath)).toBe(true);
+    expect(isDataExist('test-data.pdf', jsonPath)).toBe(true);
     expect(data).toEqual({
         checksum: 'test',
         publicKey: 'test'
     });
 
-    removeData('test.pdf', jsonPath);
+    removeData('test-data.pdf', jsonPath);
 
-    expect(isDataExist('test.pdf', jsonPath)).toBe(false);
+    expect(isDataExist('test-data.pdf', jsonPath)).toBe(false);
 
     fs.unlinkSync(jsonPath);
 });

@@ -1,176 +1,35 @@
-// const fs = require('fs');
-// const PDF = require('../../utils/PDF');
+const path = require('path');
+const PDF = require('../../utils/PDF');
+const { rootDir } = require('../../utils/constant');
+const { getData, removeData } = require('../../utils/data');
 
-// jest.mock('../../utils/data', () => {
-//     return {
-//         addData: jest.fn(),
-//         getData: jest.fn().mockReturnValue({
-//             checksum: [
-//                 'j',
-//                 '\x18',
-//                 '\x1D',
-//                 '\x02',
-//                 'È',
-//                 'e',
-//                 '{',
-//                 '<',
-//                 '-',
-//                 '2',
-//                 '\x80',
-//                 '=',
-//                 '5',
-//                 'å',
-//                 'W',
-//                 '\x81',
-//                 'å',
-//                 'Â',
-//                 'º',
-//                 '/',
-//                 'Ü',
-//                 '¨',
-//                 '\x9F',
-//                 '\x93',
-//                 'i',
-//                 '\x8A',
-//                 '\x99',
-//                 'ß',
-//                 'Ç',
-//                 '×',
-//                 'û',
-//                 ':',
-//                 'e',
-//                 '\x10',
-//                 '\x12',
-//                 '9',
-//                 'b',
-//                 '\x91',
-//                 '\x9D',
-//                 'å',
-//                 'À',
-//                 'C',
-//                 'N',
-//                 '\x1C',
-//                 'þ',
-//                 '@',
-//                 '>',
-//                 '\x7F',
-//                 'd',
-//                 '£',
-//                 '\x06',
-//                 'Q',
-//                 'ÿ',
-//                 '\\',
-//                 'ý',
-//                 '\x1F',
-//                 'å',
-//                 'Y',
-//                 'ð',
-//                 '(',
-//                 '/',
-//                 '}',
-//                 'y',
-//                 'ê'
-//             ].join(''),
-//             publicKey: 'test'
-//         })
-//     };
-// });
+const testPDF = path.join(rootDir, 'tests', 'test.pdf');
 
-// const data = require('../../utils/data');
+test('constructor', () => {
+    const pdf = new PDF('test.pdf');
+    expect(pdf.filePath).toBe('test.pdf');
+});
 
-// test('constructor', () => {
-//     const pdf = new PDF('test.pdf');
-//     expect(pdf.filePath).toBe('test.pdf');
-// });
+test('hash', () => {
+    const hash = new PDF(testPDF).hash('test');
 
-// test('hash', () => {
-//     fs.readFileSync = jest.fn().mockReturnValue(Buffer.from('test'));
+    expect(hash).toBe('d9b4a76e957a753ef37644e5ca98b910c59b9ad981d6db0cbe2b1db9c4285de4');
+});
 
-//     const hash = new PDF('test.pdf').hash('test');
+test('decrypt', () => {
+    const decryptedHash = new PDF(testPDF).decrypt('test                            ', {
+        jsonPath: path.join(rootDir, 'tests', 'data.json')
+    });
 
-//     expect(hash).toBe('cfc015064234dc3491415edf9a9821cfaf6c28df9f856a121421d6370aea5b1b');
-// });
+    expect(decryptedHash).toBe('d9b4a76e957a753ef37644e5ca98b910c59b9ad981d6db0cbe2b1db9c4285de4');
+});
 
-// test('decrypt', () => {
-//     const decryptedHash = new PDF('test.pdf').decrypt('test');
+test('sign', () => {
+    new PDF(path.join(rootDir, 'tests', 'test2.pdf')).sign('test                            ', 'test', {
+        jsonPath: path.join(rootDir, 'tests', 'data.json')
+    });
 
-//     expect(decryptedHash).toBe('cfc015064234dc3491415edf9a9821cfaf6c28df9f856a121421d6370aea5b1b');
-// });
+    expect(getData('test2.pdf', path.join(rootDir, 'tests', 'data.json')).checksum).toBe("¶øÙIè\u001bR¡P,\u0001'ò\u0018\u001cªju[ë«\u001b\\\u0004yýà\u0001\u0010\u00073Ç@\u001d@ uäcé$y¡ÓÞxªh²Ø\u0014G");
 
-// test('sign', () => {
-//     fs.readFileSync = jest.fn().mockReturnValue(Buffer.from('test'));
-
-//     new PDF('test.js').sign('test', 'test');
-
-//     expect(data.addData).toBeCalledWith('test.js', {
-//         checksum: [
-//             'j',
-//             '\x18',
-//             '\x1D',
-//             '\x02',
-//             'È',
-//             'e',
-//             '{',
-//             '<',
-//             '-',
-//             '2',
-//             '\x80',
-//             '=',
-//             '5',
-//             'å',
-//             'W',
-//             '\x81',
-//             'å',
-//             'Â',
-//             'º',
-//             '/',
-//             'Ü',
-//             '¨',
-//             '\x9F',
-//             '\x93',
-//             'i',
-//             '\x8A',
-//             '\x99',
-//             'ß',
-//             'Ç',
-//             '×',
-//             'û',
-//             ':',
-//             'e',
-//             '\x10',
-//             '\x12',
-//             '9',
-//             'b',
-//             '\x91',
-//             '\x9D',
-//             'å',
-//             'À',
-//             'C',
-//             'N',
-//             '\x1C',
-//             'þ',
-//             '@',
-//             '>',
-//             '\x7F',
-//             'd',
-//             '£',
-//             '\x06',
-//             'Q',
-//             'ÿ',
-//             '\\',
-//             'ý',
-//             '\x1F',
-//             'å',
-//             'Y',
-//             'ð',
-//             '(',
-//             '/',
-//             '}',
-//             'y',
-//             'ê'
-//         ].join(''),
-//         publicKey: 'test                            '
-//     });
-// });
-
-test('true', () => expect(true).toBe(true));
+    removeData('test2.pdf', path.join(rootDir, 'tests', 'data.json'));
+});

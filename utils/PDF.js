@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const AES = require('./AES');
 const BLAKE2s = require('./BLAKE2s');
+const { rootDir } = require('./constant');
 const { textToDec } = require('./converter');
 const { addData, getData } = require('./data');
 
@@ -43,10 +44,11 @@ class PDF {
 
     /**
      * @param {string} privateKey
+     * @param {{ jsonPath: string }} decryptOption
      * @returns
      */
-    decrypt(privateKey) {
-        const ciphertext = getData(path.basename(this.filePath)).checksum;
+    decrypt(privateKey, decryptOption = { jsonPath: path.join(rootDir, 'data', 'data.json') }) {
+        const ciphertext = getData(path.basename(this.filePath), decryptOption.jsonPath).checksum;
         const aes = new AES(privateKey);
         const decryptedSignature = aes.decrypt(ciphertext);
 
@@ -56,9 +58,10 @@ class PDF {
     /**
      * @param {string} privateKey
      * @param {string} publicKey
+     * @param {{ jsonPath: string }} signOption
      * @returns
      */
-    sign(privateKey, publicKey) {
+    sign(privateKey, publicKey, signOption = { jsonPath: path.join(rootDir, 'data', 'data.json') }) {
         const fileBuffer = fs.readFileSync(this.filePath);
 
         publicKey = publicKey.padEnd(32, ' ');
@@ -71,10 +74,14 @@ class PDF {
         const aes = new AES(privateKey);
         const encryptedSignature = aes.encrypt(signature);
 
-        addData(path.basename(this.filePath), {
-            checksum: encryptedSignature,
-            publicKey
-        });
+        addData(
+            path.basename(this.filePath),
+            {
+                checksum: encryptedSignature,
+                publicKey
+            },
+            signOption.jsonPath
+        );
 
         return this;
     }
