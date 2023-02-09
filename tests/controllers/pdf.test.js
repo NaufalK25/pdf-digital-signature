@@ -14,8 +14,6 @@ jest.mock('../../utils/data', () => {
     };
 });
 
-const data = require('../../utils/data');
-
 const mockRequest = ({ file, files, flash, body }) => ({
     file,
     files,
