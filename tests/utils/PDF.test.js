@@ -1,5 +1,4 @@
 const fs = require('fs');
-const AES = require('../../utils/AES');
 const PDF = require('../../utils/PDF');
 
 jest.mock('../../utils/data', () => {

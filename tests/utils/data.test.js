@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { rootDir } = require('../../utils/constant');
+
+jest.unmock('../../utils/data');
+
 const { addData, getData, isDataExist, removeData } = require('../../utils/data');
 
 test('json file exists', () => {
