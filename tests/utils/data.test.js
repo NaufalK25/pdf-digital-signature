@@ -1,8 +1,13 @@
-jest.resetModules();
-
 const fs = require('fs');
 const path = require('path');
 const { rootDir } = require('../../utils/constant');
+
+jest.mock('../../utils/data', () => {
+    return {
+        ...jest.requireActual('../../utils/data')
+    };
+});
+
 const { addData, getData, isDataExist, removeData } = require('../../utils/data');
 
 test('json file exists', () => {
