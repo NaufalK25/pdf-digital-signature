@@ -93,11 +93,11 @@ class BLAKE2s {
         }
 
         if (salt && salt.length !== BLAKE2s.SALT_LENGTH) {
-            throw new Error(`salt must be ${BLAKE2s.SALT_LENGTH}  bytes`);
+            throw new Error(`salt must be ${BLAKE2s.SALT_LENGTH} bytes`);
         }
 
         if (personalization && personalization.length !== BLAKE2s.PERSONALIZATION_LENGTH) {
-            throw new Error(`personalization must be ${PERSONALIZATION_LENGTH} bytes`);
+            throw new Error(`personalization must be ${BLAKE2s.PERSONALIZATION_LENGTH} bytes`);
         }
 
         this.isFinished = false;

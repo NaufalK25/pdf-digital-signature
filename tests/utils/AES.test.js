@@ -34,7 +34,7 @@ describe('encrypt', () => {
         const aes = new AES('test');
         expect(() => {
             aes.encrypt('testtesttest');
-        }).toThrow('Plaintext must be a multiple of 16 characters');
+        }).toThrowError('Plaintext must be a multiple of 16 characters');
     });
 });
 
@@ -51,6 +51,6 @@ describe('decrypt', () => {
         const encrypted = aes.encrypt('testtesttesttest');
         expect(() => {
             aes.decrypt(encrypted.slice(0, 12));
-        }).toThrow('Ciphertext must be a multiple of 16 characters');
+        }).toThrowError('Ciphertext must be a multiple of 16 characters');
     });
 });
