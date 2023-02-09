@@ -1,3 +1,5 @@
+jest.resetModules();
+
 const fs = require('fs');
 const path = require('path');
 const { rootDir } = require('../../utils/constant');
