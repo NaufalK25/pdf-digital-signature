@@ -1,8 +1,8 @@
-const bcrypt = require('bcrypt');
-const express = require('express');
 const { validationResult } = require('express-validator');
+const BLAKE2s = require('../utils/BLAKE2s');
 const passport = require('../middlewares/passportLocalMiddleware');
 const { User } = require('../database/models');
+const { textToDec } = require('../utils/converter');
 
 const getRegister = (req, res) => {
     res.render('register', {
@@ -58,9 +58,15 @@ const postRegister = async (req, res) => {
     }
 
     const { username, password } = req.body;
+
+    const passwordBuffer = Buffer.from(password);
+    const publicKey = username.padEnd(32, ' ');
+    const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
+    const hashedPassword = new BLAKE2s(publicKey.length, keyBuffer).update(passwordBuffer).hexDigest();
+
     await User.create({
         username,
-        password: await bcrypt.hash(password, 10)
+        password: hashedPassword
     });
 
     req.flash('type', 'success');
@@ -69,42 +75,39 @@ const postRegister = async (req, res) => {
 };
 
 const postLogin = (req, res) => {
-    passport.authenticate(
-        'local',
-        (err, user, info) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            req.flash('type', 'danger');
+            req.flash('message', 'Something went wrong');
+            return res.redirect('/login');
+        }
+
+        if (!user) {
+            req.flash('type', 'danger');
+            req.flash('message', info.message);
+            return res.redirect('/login');
+        }
+
+        req.login(user, err => {
             if (err) {
                 req.flash('type', 'danger');
                 req.flash('message', 'Something went wrong');
                 return res.redirect('/login');
             }
 
-            if (!user) {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
                 req.flash('type', 'danger');
-                req.flash('message', info.message);
+                req.flash('message', errors.array()[0].msg);
                 return res.redirect('/login');
             }
 
-            req.login(user, err => {
-                if (err) {
-                    req.flash('type', 'danger');
-                    req.flash('message', 'Something went wrong');
-                    return res.redirect('/login');
-                }
-
-                const errors = validationResult(req);
-
-                if (!errors.isEmpty()) {
-                    req.flash('type', 'danger');
-                    req.flash('message', errors.array()[0].msg);
-                    return res.redirect('/login');
-                }
-
-                req.flash('type', 'success');
-                req.flash('message', 'You have been logged in successfully');
-                res.redirect('/');
-            });
-        }
-    )(req, res);
+            req.flash('type', 'success');
+            req.flash('message', 'You have been logged in successfully');
+            res.redirect('/');
+        });
+    })(req, res);
 };
 
 module.exports = {

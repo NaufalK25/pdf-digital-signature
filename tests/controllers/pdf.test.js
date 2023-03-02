@@ -14,7 +14,8 @@ jest.mock('../../utils/data', () => {
     };
 });
 
-const mockRequest = ({ file, files, flash, body }) => ({
+const mockRequest = ({ user, file, files, flash, body }) => ({
+    user,
     file,
     files,
     flash,
@@ -27,50 +28,110 @@ const mockResponse = () => {
     return res;
 };
 
-test('getRoot Controller', () => {
-    fs.readdirSync = jest.fn().mockReturnValue(['.gitkeep', 'test3.pdf', 'test.pdf', 'test2.pdf']);
-
-    const req = mockRequest({
-        flash: jest.fn()
+describe('getRoot Controller', () => {
+    beforeAll(() => {
+        fs.readdirSync = jest.fn().mockReturnValue(['.gitkeep', 'test3.pdf', 'test.pdf', 'test2.pdf']);
     });
-    const res = mockResponse();
 
-    getRoot(req, res);
+    test('with user', () => {
+        const req = mockRequest({
+            user: {
+                username: 'test',
+                password: 'test'
+            },
+            flash: jest.fn()
+        });
+        const res = mockResponse();
 
-    expect(res.render).toHaveBeenCalledWith('index', {
-        pdfs: [
-            {
-                name: 'test3.pdf',
-                url: `uploads${path.sep}test3.pdf`,
-                isHashed: true,
-                data: {
-                    checksum: 'test',
-                    publicKey: 'test'
+        getRoot(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('index', {
+            title: 'PDF Digital Signature',
+            activeNav: 'home',
+            loggedInUser: req.user || null,
+            pdfs: [
+                {
+                    name: 'test3.pdf',
+                    url: `uploads${path.sep}test3.pdf`,
+                    isHashed: true,
+                    data: {
+                        checksum: 'test',
+                        publicKey: 'test'
+                    }
+                },
+                {
+                    name: 'test2.pdf',
+                    url: `uploads${path.sep}test2.pdf`,
+                    isHashed: true,
+                    data: {
+                        checksum: 'test',
+                        publicKey: 'test'
+                    }
+                },
+                {
+                    name: 'test.pdf',
+                    url: `uploads${path.sep}test.pdf`,
+                    isHashed: true,
+                    data: {
+                        checksum: 'test',
+                        publicKey: 'test'
+                    }
                 }
-            },
-            {
-                name: 'test2.pdf',
-                url: `uploads${path.sep}test2.pdf`,
-                isHashed: true,
-                data: {
-                    checksum: 'test',
-                    publicKey: 'test'
-                }
-            },
-            {
-                name: 'test.pdf',
-                url: `uploads${path.sep}test.pdf`,
-                isHashed: true,
-                data: {
-                    checksum: 'test',
-                    publicKey: 'test'
-                }
+            ],
+            flash: {
+                type: '',
+                message: ''
             }
-        ],
-        flash: {
-            type: '',
-            message: ''
-        }
+        });
+    });
+
+    test('no user', () => {
+        const req = mockRequest({
+            user: null,
+            flash: jest.fn()
+        });
+        const res = mockResponse();
+
+        getRoot(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('index', {
+            title: 'PDF Digital Signature',
+            activeNav: 'home',
+            loggedInUser: req.user || null,
+            pdfs: [
+                {
+                    name: 'test3.pdf',
+                    url: `uploads${path.sep}test3.pdf`,
+                    isHashed: true,
+                    data: {
+                        checksum: 'test',
+                        publicKey: 'test'
+                    }
+                },
+                {
+                    name: 'test2.pdf',
+                    url: `uploads${path.sep}test2.pdf`,
+                    isHashed: true,
+                    data: {
+                        checksum: 'test',
+                        publicKey: 'test'
+                    }
+                },
+                {
+                    name: 'test.pdf',
+                    url: `uploads${path.sep}test.pdf`,
+                    isHashed: true,
+                    data: {
+                        checksum: 'test',
+                        publicKey: 'test'
+                    }
+                }
+            ],
+            flash: {
+                type: '',
+                message: ''
+            }
+        });
     });
 });
 

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
 const PDF = require('../utils/PDF');
 const { uploadsDir } = require('../utils/constant');
 const { getData, isDataExist, removeData } = require('../utils/data');
