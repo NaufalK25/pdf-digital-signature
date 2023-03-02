@@ -7,28 +7,13 @@ const { textToDec } = require('./converter');
 const { addData, getData } = require('./data');
 
 class PDF {
-    /**
-     * A valid PDF file starts with the following bytes: `[37, 80, 68, 70, 45, 49, 46]`
-     */
     static validPDFBuffer = [37, 80, 68, 70, 45, 49, 46];
-
-    /**
-     * Empty PDF file has `967` bytes
-     */
     static minPDFBufferLength = 967;
 
-    /**
-     *
-     * @param {string} filePath
-     */
     constructor(filePath = '') {
         this.filePath = filePath;
     }
 
-    /**
-     * @param {string} publicKey
-     * @returns
-     */
     hash(publicKey) {
         const fileBuffer = fs.readFileSync(this.filePath);
 
@@ -42,11 +27,6 @@ class PDF {
         return signature;
     }
 
-    /**
-     * @param {string} privateKey
-     * @param {{ jsonPath: string }} decryptOption
-     * @returns
-     */
     decrypt(privateKey, decryptOption = { jsonPath: path.join(rootDir, 'data', 'data.json') }) {
         const ciphertext = getData(path.basename(this.filePath), decryptOption.jsonPath).checksum;
         const aes = new AES(privateKey);
@@ -55,12 +35,6 @@ class PDF {
         return decryptedSignature;
     }
 
-    /**
-     * @param {string} privateKey
-     * @param {string} publicKey
-     * @param {{ jsonPath: string }} signOption
-     * @returns
-     */
     sign(privateKey, publicKey, signOption = { jsonPath: path.join(rootDir, 'data', 'data.json') }) {
         const fileBuffer = fs.readFileSync(this.filePath);
 

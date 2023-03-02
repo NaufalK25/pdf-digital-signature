@@ -5,11 +5,6 @@ const PDF = require('../utils/PDF');
 const { uploadsDir } = require('../utils/constant');
 const { getData, isDataExist, removeData } = require('../utils/data');
 
-/**
- * Get the root page controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
 const getRoot = (req, res) => {
     const pdfs = fs
         .readdirSync(uploadsDir)
@@ -24,6 +19,9 @@ const getRoot = (req, res) => {
 
     res.render('index', {
         pdfs,
+        title: 'PDF Digital Signature',
+        activeNav: 'home',
+        loggedInUser: req.user || null,
         flash: {
             type: req.flash('type') || '',
             message: req.flash('message') || ''
@@ -31,11 +29,6 @@ const getRoot = (req, res) => {
     });
 };
 
-/**
- * Sign PDF controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
 const signPDF = (req, res) => {
     const privateKey = req.body.private_key;
     const publicKey = req.body.public_key;
@@ -67,11 +60,6 @@ const signPDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Compare hash of 2 PDF files controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
 const compareHashPDF = (req, res) => {
     const privateKey = req.body.private_key;
     const publicKey = req.body.public_key;
@@ -103,11 +91,6 @@ const compareHashPDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Upload a PDF file controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
 const uploadPDF = (req, res) => {
     if (req.files.length <= 0) {
         req.flash('type', 'danger');
@@ -120,11 +103,6 @@ const uploadPDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Delete a PDF file controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
 const deletePDF = (req, res) => {
     const pdf = req.body.deleted_pdf;
 
@@ -136,11 +114,6 @@ const deletePDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Delete all PDF files controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
 const deleteAllPDF = (req, res) => {
     const uploadsDirContent = fs.readdirSync(uploadsDir);
 
@@ -153,7 +126,6 @@ const deleteAllPDF = (req, res) => {
 
     req.flash('type', 'success');
     req.flash('message', `Successfully deleted ${uploadsDirContent.length - 1} file(s)`);
-
     res.redirect('/');
 };
 

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+    <meta name="title" content="PDF Digital Signature" />
+    <meta name="description" content="" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="public/index.min.css">
+    <script src="public/index.min.js" defer></script>
+</head>
+
+<body>
+    <nav>
+        <p>PDF Digital Signature</p>
+        <div class="nav-icons">
+            <a href="/" class="nav-icon <%= activeNav === 'home' ? 'nav-active' : '' %>" title="Home">
+                <%- include('../public/svg/home.svg') %>
+            </a>
+
+            <% if (!loggedInUser) { %>
+            <a href="/register" class="nav-icon <%= activeNav === 'register' ? 'nav-active' : '' %>" title="Register">
+                <%- include('../public/svg/register.svg') %>
+            </a>
+
+            <a href="/login" class="nav-icon <%= activeNav === 'login' ? 'nav-active' : '' %>" title="Login">
+                <%- include('../public/svg/login.svg') %>
+            </a>
+            <% } %>
+
+            <% if (loggedInUser) { %>
+            <form action="/logout" method="POST">
+                <button type="submit" class="nav-icon" title="Logout">
+                    <%- include('../public/svg/logout.svg') %>
+                </button>
+            </form>
+            <% } %>
+
+            <a href="https://github.com/NaufalK25/pdf-digital-signature" target="_blank" rel="noopener noreferrer" class="nav-icon" title="NaufalK25/pdf-digital-signature">
+                <%- include('../public/svg/github.svg') %>
+            </a>
+        </div>
+    </nav>
+
+    <main class="mb-5 container d-flex flex-column justify-content-center align-items-center">
+        <% if (flash && flash.type.length > 0) { %>
+        <div class="alert alert-<%= flash.type %> alert-dismissible fade show" role="alert">
+            <%= flash.message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" title="Close"></button>
+        </div>
+        <% } %>
+
+        <%- body %>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+</body>
+
+</html>
