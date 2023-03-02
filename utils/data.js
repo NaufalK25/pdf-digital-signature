@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { rootDir } = require('./constant');
+const { rootDir } = require('../config/constant');
 
 const defaultJSONPath = path.join(rootDir, 'data', 'data.json');
 

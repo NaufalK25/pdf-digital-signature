@@ -1,6 +1,6 @@
 const path = require('path');
 const PDF = require('../../utils/PDF');
-const { rootDir } = require('../../utils/constant');
+const { rootDir } = require('../../config/constant');
 const { getData, removeData } = require('../../utils/data');
 
 const testPDF = path.join(rootDir, 'tests', 'test.pdf');

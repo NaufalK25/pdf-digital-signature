@@ -8,7 +8,7 @@ const morgan = require('morgan');
 const passport = require('passport');
 const session = require('express-session');
 const router = require('./router');
-const { rootDir, uploadsDir } = require('./utils/constant');
+const { rootDir, uploadsDir } = require('./config/constant');
 
 const app = express();
 

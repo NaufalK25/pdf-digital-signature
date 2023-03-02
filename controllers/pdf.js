@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const PDF = require('../utils/PDF');
-const { uploadsDir } = require('../utils/constant');
+const { uploadsDir } = require('../config/constant');
 const { getData, isDataExist, removeData } = require('../utils/data');
 
 const getRoot = (req, res) => {

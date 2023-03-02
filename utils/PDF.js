@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const AES = require('./AES');
 const BLAKE2s = require('./BLAKE2s');
-const { rootDir } = require('./constant');
 const { textToDec } = require('./converter');
 const { addData, getData } = require('./data');
+const { rootDir } = require('../config/constant');
 
 class PDF {
     static validPDFBuffer = [37, 80, 68, 70, 45, 49, 46];

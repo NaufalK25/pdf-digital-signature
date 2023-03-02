@@ -2,9 +2,14 @@
     <form action="/uploads" method="POST" enctype="multipart/form-data">
         <div class="input-group custom-file">
             <input type="file" name="files" accept=".pdf" class="form-control" id="uploadFile" aria-describedby="uploadFileAddon" aria-label="Upload" multiple required autofocus>
+
+            <% if (loggedInUser) { %>
             <button class="btn btn-primary" type="submit" id="uploadFileAddon" title="Upload">
                 <span>Upload</span>
             </button>
+            <% } else { %>
+            <a href="/login" class="btn btn-primary" id="uploadFileAddon" title="Upload">Upload</a>
+            <% } %>
         </div>
     </form>
 </div>

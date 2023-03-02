@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { rootDir } = require('../../utils/constant');
+const { rootDir } = require('../../config/constant');
 const { addData, getData, isDataExist, removeData } = require('../../utils/data');
 
 test('json file exists', () => {
