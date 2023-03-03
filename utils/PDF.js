@@ -3,8 +3,7 @@ const path = require('path');
 const AES = require('./AES');
 const BLAKE2s = require('./BLAKE2s');
 const { textToDec } = require('./converter');
-const { addData, getData } = require('./data');
-const { rootDir } = require('../config/constant');
+const { UploadedPDF } = require('../database/models');
 
 class PDF {
     static validPDFBuffer = [37, 80, 68, 70, 45, 49, 46];
@@ -21,41 +20,28 @@ class PDF {
 
         const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
 
-        const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
-        const signature = blake2s.update(fileBuffer).hexDigest();
-
-        return signature;
+        return new BLAKE2s(publicKey.length, keyBuffer).update(fileBuffer).hexDigest();
     }
 
-    decrypt(privateKey, decryptOption = { jsonPath: path.join(rootDir, 'data', 'data.json') }) {
-        const ciphertext = getData(path.basename(this.filePath), decryptOption.jsonPath).checksum;
-        const aes = new AES(privateKey);
-        const decryptedSignature = aes.decrypt(ciphertext);
-
-        return decryptedSignature;
+    async decrypt(req, privateKey) {
+        return new AES(privateKey).decrypt(await UploadedPDF.getChecksumByPDFName(req.user.id, path.basename(this.filePath)));
     }
 
-    sign(privateKey, publicKey, signOption = { jsonPath: path.join(rootDir, 'data', 'data.json') }) {
+    async sign(req, privateKey, publicKey) {
         const fileBuffer = fs.readFileSync(this.filePath);
 
         publicKey = publicKey.padEnd(32, ' ');
 
         const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
 
-        const blake2s = new BLAKE2s(publicKey.length, keyBuffer);
-        const signature = blake2s.update(fileBuffer).hexDigest();
+        const signature = new BLAKE2s(publicKey.length, keyBuffer).update(fileBuffer).hexDigest();
+        const encryptedSignature = new AES(privateKey).encrypt(signature);
 
-        const aes = new AES(privateKey);
-        const encryptedSignature = aes.encrypt(signature);
-
-        addData(
-            path.basename(this.filePath),
-            {
-                checksum: encryptedSignature,
-                publicKey
-            },
-            signOption.jsonPath
-        );
+        await UploadedPDF.updateByPDFName(req.user.id, path.basename(this.filePath), {
+            isHashed: true,
+            checksum: encryptedSignature,
+            publicKey
+        });
 
         return this;
     }

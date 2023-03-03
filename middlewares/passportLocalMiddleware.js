@@ -12,7 +12,7 @@ passport.use(
         },
         async (username, password, done) => {
             try {
-                const user = await User.findOne({ where: { username } });
+                const user = await User.findByUsername(username);
                 if (!user) return done(null, false, { param: 'username', message: 'Username or Password is incorrect' });
 
                 const passwordBuffer = Buffer.from(password);

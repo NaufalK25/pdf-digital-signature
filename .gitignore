@@ -14,8 +14,6 @@ coverage/
 
 # Misc
 *.pdf
-temp/
-data/*
 !tests/**/*.pdf
 public/**/*.css
 public/**/*.js

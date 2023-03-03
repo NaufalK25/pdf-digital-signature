@@ -7,7 +7,8 @@ module.exports = {
         database: process.env.DB_NAME || 'pdf_digital_signature',
         host: process.env.DB_HOST || '127.0.0.1',
         port: process.env.DB_PORT || 3306,
-        dialect: process.env.DB_DIALECT || 'mysql'
+        dialect: process.env.DB_DIALECT || 'mysql',
+        logging: false
     },
     test: {
         username: process.env.CI_DB_USER || 'root',

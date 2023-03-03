@@ -28,20 +28,6 @@ const getLogin = (req, res) => {
     });
 };
 
-const postLogout = (req, res) => {
-    req.logout(err => {
-        if (err) {
-            req.flash('type', 'danger');
-            req.flash('message', 'Something went wrong');
-            return res.redirect('/');
-        }
-
-        req.flash('type', 'success');
-        req.flash('message', 'You have been logged out successfully');
-        return res.redirect('/');
-    });
-};
-
 const postRegister = async (req, res) => {
     const errors = validationResult(req);
 
@@ -108,6 +94,20 @@ const postLogin = (req, res) => {
             res.redirect('/');
         });
     })(req, res);
+};
+
+const postLogout = (req, res) => {
+    req.logout(err => {
+        if (err) {
+            req.flash('type', 'danger');
+            req.flash('message', 'Something went wrong');
+            return res.redirect('/');
+        }
+
+        req.flash('type', 'success');
+        req.flash('message', 'You have been logged out successfully');
+        return res.redirect('/');
+    });
 };
 
 module.exports = {

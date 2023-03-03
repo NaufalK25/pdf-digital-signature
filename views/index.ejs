@@ -43,10 +43,10 @@
                     <a href="<%= pdf.url %>" target="_blank" rel="noopener noreferrer" title="<%= pdf.name %>"><%= pdf.name %></a>
                     <% if (pdf.isHashed) { %>
                     <div>
-                        <span class="text-small">Checksum: <%= pdf.data.checksum || '-' %></span>
+                        <span class="text-small">Checksum: <%= pdf.checksum || '-' %></span>
                     </div>
                     <div>
-                        <span class="text-small">Public Key: <%= pdf.data.publicKey || '-' %></span>
+                        <span class="text-small">Public Key: <%= pdf.publicKey || '-' %></span>
                     </div>
                     <% } %>
                 </td>
@@ -97,13 +97,7 @@
                                     <input type="hidden" name="signed_pdf" value="<%= pdf.name %>">
 
                                     <div class="p-2 d-flex flex-column sign-input-group">
-                                        <label for="private_key<%= pdf.name %>">Private Key For Encryption</label>
-                                        <input type="text" class="form-control" name="private_key" id="private_key<%= pdf.name %>" minlength="1" maxlength="16" required>
-                                        <p class="text-small text-secondary">Note: Private Key is recommended to be 1-16 characters long.</p>
-                                    </div>
-
-                                    <div class="p-2 d-flex flex-column sign-input-group">
-                                        <label for="public_key<%= pdf.name %>">Public Key For Hash</label>
+                                        <label for="public_key<%= pdf.name %>">Public Key</label>
                                         <input type="text" class="form-control" name="public_key" id="public_key<%= pdf.name %>" minlength="1" maxlength="32" required>
                                         <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
                                     </div>
@@ -166,20 +160,14 @@
             </div>
 
             <div>
-                <label for="private_key">Private Key For Decryption</label>
-                <input type="text" class="form-control" name="private_key" id="private_key" minlength="1" maxlength="16" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
-                <p class="text-small text-secondary">Note: Private Key is recommended to be 1-16 characters long.</p>
-            </div>
-        </div>
-
-        <div class="d-flex sign-input-group">
-            <div>
                 <label for="normal_pdf">Normal PDF</label>
                 <input type="file" class="form-control" name="normal_pdf" id="normal_pdf" accept=".pdf" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
             </div>
+        </div>
 
+        <div class="d-flex justify-content-center">
             <div>
-                <label for="public_key">Public Key For Hash</label>
+                <label for="public_key">Public Key</label>
                 <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
                 <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
             </div>
