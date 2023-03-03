@@ -8,13 +8,19 @@
     $ node -v
     ```
 
-2. [npm](https://www.npmjs.com/)
+2. [NPM](https://www.npmjs.com/)
 
     ```bash
     $ npm -v
     ```
 
-3. [Git](https://git-scm.com/)
+3. [MySQL](https://www.mysql.com/)
+
+    ```bash
+    $ mysql -V
+    ```
+
+4. [Git](https://git-scm.com/)
 
     ```bash
     $ git --version
@@ -31,13 +37,19 @@
 2. Install dependencies
 
     ```bash
-    $ npm install
+    $ npm i
     ```
 
-3. Run the development server
+3. Copy `.env.example` to `.env` and fill the environment variables
+
+    ```bash
+    $ cp .env.example .env
+    ```
+
+4. Run the development server
 
     ```bash
     $ npm run dev
     ```
 
-4. Open the website in your browser (default: [http://localhost:3000](http://localhost:3000))
+5. Open the website in your browser (default: [http://localhost:3000](http://localhost:3000))

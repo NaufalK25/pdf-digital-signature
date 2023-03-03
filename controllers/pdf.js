@@ -1,29 +1,29 @@
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
 const PDF = require('../utils/PDF');
-const { uploadsDir } = require('../utils/constant');
-const { getData, isDataExist, removeData } = require('../utils/data');
+const { uploadsDir } = require('../config/constant');
+const { UploadedPDF, User } = require('../database/models');
 
-/**
- * Get the root page controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const getRoot = (req, res) => {
-    const pdfs = fs
-        .readdirSync(uploadsDir)
-        .filter(pdf => path.parse(pdf).ext === '.pdf')
-        .sort((a, b) => (a > b ? -1 : 1))
-        .map(pdf => ({
-            name: pdf,
-            url: path.join('uploads', pdf),
-            isHashed: isDataExist(pdf),
-            data: getData(pdf)
+const getRoot = async (req, res) => {
+    let pdfs = [];
+
+    if (req.user) {
+        const loggedInUserPDFs = await UploadedPDF.findByUploaderId(req.user.id);
+
+        pdfs = loggedInUserPDFs.map(({ name, url, isHashed, checksum, publicKey }) => ({
+            name,
+            url,
+            isHashed,
+            checksum,
+            publicKey
         }));
+    }
 
     res.render('index', {
         pdfs,
+        title: 'PDF Digital Signature',
+        activeNav: 'home',
+        loggedInUser: req.user || null,
         flash: {
             type: req.flash('type') || '',
             message: req.flash('message') || ''
@@ -31,19 +31,45 @@ const getRoot = (req, res) => {
     });
 };
 
-/**
- * Sign PDF controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const signPDF = (req, res) => {
-    const privateKey = req.body.private_key;
+const signPDF = async (req, res) => {
     const publicKey = req.body.public_key;
     const pdf = req.body.signed_pdf;
 
-    if (!privateKey) {
+    if (!publicKey) {
         req.flash('type', 'danger');
-        req.flash('message', 'Please enter a private key');
+        req.flash('message', 'Please enter a public key');
+        return res.redirect('/');
+    }
+
+    if (publicKey.length <= 0 || publicKey.length > 32) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Public Key must be 1-32 characters long');
+        return res.redirect('/');
+    }
+
+    const privateKey = await User.generatePrivateKey(req.user.username);
+    await new PDF(path.join(uploadsDir, pdf)).sign(req, privateKey, publicKey);
+
+    req.flash('type', 'success');
+    req.flash('message', `File ${pdf} has been signed`);
+
+    res.redirect('/');
+};
+
+const compareHashPDF = async (req, res) => {
+    const hashedPDF = req.body.hashed_pdf;
+    const normalPDF = req.file;
+    const publicKey = req.body.public_key;
+
+    if (!hashedPDF) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please select a hashed PDF file');
+        return res.redirect('/');
+    }
+
+    if (!normalPDF) {
+        req.flash('type', 'danger');
+        req.flash('message', 'Please upload a normal PDF file');
         return res.redirect('/');
     }
 
@@ -59,40 +85,9 @@ const signPDF = (req, res) => {
         return res.redirect('/');
     }
 
-    new PDF(path.join(uploadsDir, pdf)).sign(privateKey, publicKey);
-
-    req.flash('type', 'success');
-    req.flash('message', `File ${pdf} has been signed`);
-
-    res.redirect('/');
-};
-
-/**
- * Compare hash of 2 PDF files controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const compareHashPDF = (req, res) => {
-    const privateKey = req.body.private_key;
-    const publicKey = req.body.public_key;
-    const hashedPDF = req.body.hashed_pdf;
-    const normalPDF = req.file;
-
-    if (!hashedPDF) {
-        req.flash('type', 'danger');
-        req.flash('message', 'Please select a hashed PDF file');
-        return res.redirect('/');
-    }
-
-    if (!normalPDF) {
-        req.flash('type', 'danger');
-        req.flash('message', 'Please upload a normal PDF file');
-        return res.redirect('/');
-    }
-
-    const checksumHashedPDF = new PDF(path.join(uploadsDir, hashedPDF)).decrypt(privateKey);
+    const privateKey = await User.generatePrivateKey(req.user.username);
+    const checksumHashedPDF = await new PDF(path.join(uploadsDir, hashedPDF)).decrypt(req, privateKey);
     const checksumNormalPDF = new PDF(normalPDF.path).hash(publicKey);
-
     const isSame = checksumHashedPDF === checksumNormalPDF;
 
     req.flash('type', isSame ? 'success' : 'danger');
@@ -103,16 +98,19 @@ const compareHashPDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Upload a PDF file controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const uploadPDF = (req, res) => {
+const uploadPDF = async (req, res) => {
     if (req.files.length <= 0) {
         req.flash('type', 'danger');
         req.flash('message', 'Please select one or more files to upload');
         return res.redirect('/');
+    }
+
+    for (const file of req.files) {
+        await UploadedPDF.create({
+            uploaderId: req.user.id,
+            name: file.filename,
+            url: path.join('uploads', file.filename)
+        });
     }
 
     req.flash('type', 'success');
@@ -120,15 +118,10 @@ const uploadPDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Delete a PDF file controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const deletePDF = (req, res) => {
+const deletePDF = async (req, res) => {
     const pdf = req.body.deleted_pdf;
 
-    removeData(pdf);
+    await UploadedPDF.deleteByPDFName(req.user.id, pdf);
     fs.unlinkSync(path.join(uploadsDir, pdf));
 
     req.flash('type', 'success');
@@ -136,24 +129,20 @@ const deletePDF = (req, res) => {
     res.redirect('/');
 };
 
-/**
- * Delete all PDF files controller
- * @param {express.Request} req
- * @param {express.Response} res
- */
-const deleteAllPDF = (req, res) => {
+const deleteAllPDF = async (req, res) => {
+    const loggedInUserPDFs = await UploadedPDF.findByUploaderId(req.user.id);
+    const loggedInUserPDFsName = loggedInUserPDFs.map(pdf => pdf.name);
     const uploadsDirContent = fs.readdirSync(uploadsDir);
 
+    await UploadedPDF.deleteByUploaderId(req.user.id);
     uploadsDirContent
-        .filter(file => path.parse(file).ext === '.pdf')
+        .filter(file => loggedInUserPDFsName.includes(file))
         .forEach(pdf => {
-            removeData(pdf);
             fs.unlinkSync(path.join(uploadsDir, pdf));
         });
 
     req.flash('type', 'success');
     req.flash('message', `Successfully deleted ${uploadsDirContent.length - 1} file(s)`);
-
     res.redirect('/');
 };
 
