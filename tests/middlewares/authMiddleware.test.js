@@ -1,8 +1,6 @@
 const { alreadyLoggedIn, notLoggedIn } = require('../../middlewares/authMiddleware');
 
-const mockRequest = ({ user }) => ({
-    user
-});
+const mockRequest = ({ user } = {}) => ({ user });
 const mockResponse = () => {
     const res = {};
     res.redirect = jest.fn().mockReturnValue(res);

@@ -8,9 +8,12 @@ const morgan = require('morgan');
 const passport = require('passport');
 const session = require('express-session');
 const router = require('./router');
+const initializePassport = require('./config/passport');
 const { rootDir, uploadsDir } = require('./config/constant');
 
 const app = express();
+
+initializePassport();
 
 app.set('view engine', 'ejs');
 app.set('layout', 'layout');

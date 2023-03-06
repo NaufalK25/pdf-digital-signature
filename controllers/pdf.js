@@ -8,15 +8,7 @@ const getRoot = async (req, res) => {
     let pdfs = [];
 
     if (req.user) {
-        const loggedInUserPDFs = await UploadedPDF.findByUploaderId(req.user.id);
-
-        pdfs = loggedInUserPDFs.map(({ name, url, isHashed, checksum, publicKey }) => ({
-            name,
-            url,
-            isHashed,
-            checksum,
-            publicKey
-        }));
+        pdfs = await UploadedPDF.findByUploaderId(req.user.id);
     }
 
     res.render('index', {

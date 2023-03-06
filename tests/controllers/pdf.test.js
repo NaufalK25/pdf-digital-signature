@@ -3,11 +3,11 @@ const path = require('path');
 const PDF = require('../../utils/PDF');
 const { compareHashPDF, deleteAllPDF, deletePDF, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
 
-const mockRequest = ({ user, file, files, flash, body }) => ({
+const mockRequest = ({ user, file, files, body } = {}) => ({
+    flash: jest.fn(),
     user,
     file,
     files,
-    flash,
     body
 });
 const mockResponse = () => {
@@ -31,8 +31,7 @@ test('success', () => {
 //             user: {
 //                 username: 'test',
 //                 password: 'test'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -74,8 +73,7 @@ test('success', () => {
 
 //     test('no user', () => {
 //         const req = mockRequest({
-//             user: null,
-//             flash: jest.fn()
+//             user: null
 //         });
 //         const res = mockResponse();
 
@@ -130,8 +128,7 @@ test('success', () => {
 //             body: {
 //                 public_key: 'test',
 //                 signed_pdf: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -147,8 +144,7 @@ test('success', () => {
 //             body: {
 //                 private_key: 'test',
 //                 signed_pdf: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -165,8 +161,7 @@ test('success', () => {
 //                 private_key: 'test',
 //                 public_key: 'testtesttesttesttesttesttesttesttest',
 //                 signed_pdf: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -183,8 +178,7 @@ test('success', () => {
 //                 private_key: 'test',
 //                 public_key: 'test',
 //                 signed_pdf: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -218,8 +212,7 @@ test('success', () => {
 //             file: {
 //                 filename: 'test.pdf',
 //                 path: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -236,8 +229,7 @@ test('success', () => {
 //                 private_key: 'test',
 //                 public_key: 'test',
 //                 hashed_pdf: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -258,8 +250,7 @@ test('success', () => {
 //             file: {
 //                 filename: 'test.pdf',
 //                 path: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -283,8 +274,7 @@ test('success', () => {
 //             file: {
 //                 filename: 'test.pdf',
 //                 path: 'test.pdf'
-//             },
-//             flash: jest.fn()
+//             }
 //         });
 //         const res = mockResponse();
 
@@ -299,8 +289,7 @@ test('success', () => {
 // describe('uploadPDF Controller', () => {
 //     test('pdfs uploaded', () => {
 //         const req = mockRequest({
-//             files: [{ originalname: 'test.pdf' }, { originalname: 'test2.pdf' }],
-//             flash: jest.fn()
+//             files: [{ originalname: 'test.pdf' }, { originalname: 'test2.pdf' }]
 //         });
 //         const res = mockResponse();
 
@@ -313,8 +302,7 @@ test('success', () => {
 
 //     test('no pdfs uploaded', () => {
 //         const req = mockRequest({
-//             files: [],
-//             flash: jest.fn()
+//             files: []
 //         });
 //         const res = mockResponse();
 
@@ -331,8 +319,7 @@ test('success', () => {
 //     removeData = jest.fn();
 
 //     const req = mockRequest({
-//         body: { deleted_pdf: 'test.pdf' },
-//         flash: jest.fn()
+//         body: { deleted_pdf: 'test.pdf' }
 //     });
 //     const res = mockResponse();
 
@@ -347,9 +334,7 @@ test('success', () => {
 //     fs.readdirSync = jest.fn().mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
 //     fs.unlinkSync = jest.fn();
 
-//     const req = mockRequest({
-//         flash: jest.fn()
-//     });
+//     const req = mockRequest();
 //     const res = mockResponse();
 
 //     deleteAllPDF(req, res);

@@ -1,6 +1,6 @@
+const passport = require('passport');
 const { validationResult } = require('express-validator');
 const BLAKE2s = require('../utils/BLAKE2s');
-const passport = require('../middlewares/passportLocalMiddleware');
 const { User } = require('../database/models');
 const { textToDec } = require('../utils/converter');
 
@@ -70,7 +70,7 @@ const postLogin = (req, res) => {
 
         if (!user) {
             req.flash('type', 'danger');
-            req.flash('message', info.message);
+            req.flash('message', info?.message || 'Something went wrong');
             return res.redirect('/login');
         }
 
@@ -106,7 +106,7 @@ const postLogout = (req, res) => {
 
         req.flash('type', 'success');
         req.flash('message', 'You have been logged out successfully');
-        return res.redirect('/');
+        res.redirect('/');
     });
 };
 
