@@ -37,9 +37,7 @@ describe('alreadyLoggedIn middleware', () => {
 
 describe('notLoggedIn middleware', () => {
     test('should redirect to /login if user is not logged in', () => {
-        const req = mockRequest({
-            user: null
-        });
+        const req = mockRequest({ user: null });
         const res = mockResponse();
 
         notLoggedIn(req, res, jest.fn());

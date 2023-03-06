@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const PDF = require('../../utils/PDF');
 const { compareHashPDF, deleteAllPDF, deletePDF, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
+const { UploadedPDF, User } = require('../../database/models');
 
 const mockRequest = ({ user, file, files, body } = {}) => ({
     flash: jest.fn(),
@@ -17,329 +18,369 @@ const mockResponse = () => {
     return res;
 };
 
-test('success', () => {
-    expect(1).toBe(1);
+describe('getRoot Controller', () => {
+    test('with user', async () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            }
+        });
+        const res = mockResponse();
+
+        UploadedPDF.findByUploaderId = jest.fn().mockReturnValue([
+            {
+                name: 'test.pdf',
+                url: `uploads${path.sep}test.pdf`,
+                isHashed: true,
+                checksum: 'test',
+                publicKey: 'test'
+            },
+            {
+                name: 'test2.pdf',
+                url: `uploads${path.sep}test2.pdf`,
+                isHashed: false,
+                checksum: null,
+                publicKey: null
+            }
+        ]);
+
+        await getRoot(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('index', {
+            title: 'PDF Digital Signature',
+            activeNav: 'home',
+            loggedInUser: req.user || null,
+            pdfs: [
+                {
+                    name: 'test.pdf',
+                    url: `uploads${path.sep}test.pdf`,
+                    isHashed: true,
+                    checksum: 'test',
+                    publicKey: 'test'
+                },
+                {
+                    name: 'test2.pdf',
+                    url: `uploads${path.sep}test2.pdf`,
+                    isHashed: false,
+                    checksum: null,
+                    publicKey: null
+                }
+            ],
+            flash: {
+                type: req.flash('type') || '',
+                message: req.flash('message') || ''
+            }
+        });
+    });
+
+    test('no user', () => {
+        const req = mockRequest({ user: null });
+        const res = mockResponse();
+
+        getRoot(req, res);
+
+        expect(res.render).toHaveBeenCalledWith('index', {
+            title: 'PDF Digital Signature',
+            activeNav: 'home',
+            loggedInUser: req.user || null,
+            pdfs: [],
+            flash: {
+                type: req.flash('type') || '',
+                message: req.flash('message') || ''
+            }
+        });
+    });
 });
 
-// describe('getRoot Controller', () => {
-//     beforeAll(() => {
-//         fs.readdirSync = jest.fn().mockReturnValue(['.gitkeep', 'test3.pdf', 'test.pdf', 'test2.pdf']);
-//     });
+describe('signPDF Controller', () => {
+    beforeAll(() => {
+        PDF.prototype.sign = jest.fn();
+    });
 
-//     test('with user', () => {
-//         const req = mockRequest({
-//             user: {
-//                 username: 'test',
-//                 password: 'test'
-//             }
-//         });
-//         const res = mockResponse();
+    test('pdf signed', async () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            body: {
+                public_key: 'test',
+                signed_pdf: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//         getRoot(req, res);
+        User.generatePrivateKey = jest.fn().mockReturnValue('test');
+        User.findByUsername = jest.fn().mockReturnValue({
+            id: 1,
+            username: 'test',
+            password: 'test'
+        });
 
-//         expect(res.render).toHaveBeenCalledWith('index', {
-//             title: 'PDF Digital Signature',
-//             activeNav: 'home',
-//             loggedInUser: req.user || null,
-//             pdfs: [
-//                 {
-//                     name: 'test3.pdf',
-//                     url: `uploads${path.sep}test3.pdf`,
-//                     isHashed: true,
-//                     checksum: 'test',
-//                     publicKey: 'test'
-//                 },
-//                 {
-//                     name: 'test2.pdf',
-//                     url: `uploads${path.sep}test2.pdf`,
-//                     isHashed: true,
-//                     checksum: 'test',
-//                     publicKey: 'test'
-//                 },
-//                 {
-//                     name: 'test.pdf',
-//                     url: `uploads${path.sep}test.pdf`,
-//                     isHashed: true,
-//                     checksum: 'test',
-//                     publicKey: 'test'
-//                 }
-//             ],
-//             flash: {
-//                 type: '',
-//                 message: ''
-//             }
-//         });
-//     });
+        await signPDF(req, res);
 
-//     test('no user', () => {
-//         const req = mockRequest({
-//             user: null
-//         });
-//         const res = mockResponse();
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'File test.pdf has been signed');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//         getRoot(req, res);
+    test('no public key', () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            body: { signed_pdf: 'test.pdf' }
+        });
+        const res = mockResponse();
 
-//         expect(res.render).toHaveBeenCalledWith('index', {
-//             title: 'PDF Digital Signature',
-//             activeNav: 'home',
-//             loggedInUser: req.user || null,
-//             pdfs: [
-//                 {
-//                     name: 'test3.pdf',
-//                     url: `uploads${path.sep}test3.pdf`,
-//                     isHashed: true,
-//                     checksum: 'test',
-//                     publicKey: 'test'
-//                 },
-//                 {
-//                     name: 'test2.pdf',
-//                     url: `uploads${path.sep}test2.pdf`,
-//                     isHashed: true,
-//                     checksum: 'test',
-//                     publicKey: 'test'
-//                 },
-//                 {
-//                     name: 'test.pdf',
-//                     url: `uploads${path.sep}test.pdf`,
-//                     isHashed: true,
-//                     checksum: 'test',
-//                     publicKey: 'test'
-//                 }
-//             ],
-//             flash: {
-//                 type: '',
-//                 message: ''
-//             }
-//         });
-//     });
-// });
+        signPDF(req, res);
 
-// describe('signPDF Controller', () => {
-//     beforeAll(() => {
-//         PDF.prototype.sign = jest.fn();
-//     });
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Please enter a public key');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//     afterAll(() => {
-//         PDF.prototype.sign.mockRestore();
-//     });
+    test('public key too short or too long', () => {
+        const req = mockRequest({
+            body: {
+                public_key: 'testtesttesttesttesttesttesttesttest',
+                signed_pdf: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//     test('no private key', () => {
-//         const req = mockRequest({
-//             body: {
-//                 public_key: 'test',
-//                 signed_pdf: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+        signPDF(req, res);
 
-//         signPDF(req, res);
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Public Key must be 1-32 characters long');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
+});
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Please enter a private key');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+describe('compareHashPDF Controller', () => {
+    beforeAll(() => {
+        fs.unlinkSync = jest.fn();
+        User.generatePrivateKey = jest.fn().mockReturnValue('test');
+        User.findByUsername = jest.fn().mockReturnValue({
+            id: 1,
+            username: 'test',
+            password: 'test'
+        });
+    });
 
-//     test('no public key', () => {
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 signed_pdf: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+    test('same pdf', async () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            body: {
+                public_key: 'test',
+                hashed_pdf: 'test.pdf'
+            },
+            file: {
+                filename: 'test.pdf',
+                path: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//         signPDF(req, res);
+        PDF.prototype.decrypt = jest.fn().mockReturnValue('signature');
+        PDF.prototype.hash = jest.fn().mockReturnValue('signature');
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Please enter a public key');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+        await compareHashPDF(req, res);
 
-//     test('public key too short or too long', () => {
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 public_key: 'testtesttesttesttesttesttesttesttest',
-//                 signed_pdf: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf and test.pdf are the same file');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//         signPDF(req, res);
+    test('different pdf', async () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            body: {
+                public_key: 'test',
+                hashed_pdf: 'test.pdf'
+            },
+            file: {
+                filename: 'test.pdf',
+                path: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Public Key must be 1-32 characters long');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+        PDF.prototype.decrypt = jest.fn().mockReturnValue('decryptsignature');
+        PDF.prototype.hash = jest.fn().mockReturnValue('hashsignature');
 
-//     test('pdf signed', () => {
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 public_key: 'test',
-//                 signed_pdf: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+        await compareHashPDF(req, res);
 
-//         signPDF(req, res);
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf and test.pdf are not the same file');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'File test.pdf has been signed');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
-// });
+    test('no hashed pdf', () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            body: { public_key: 'test' },
+            file: {
+                filename: 'test.pdf',
+                path: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-// describe('compareHashPDF Controller', () => {
-//     beforeAll(() => {
-//         fs.unlinkSync = jest.fn();
-//         PDF.prototype.decrypt = jest.fn().mockReturnValue('signature');
-//         PDF.prototype.hash = jest.fn().mockReturnValue('signature');
-//     });
+        compareHashPDF(req, res);
 
-//     afterAll(() => {
-//         fs.unlinkSync.mockRestore();
-//         PDF.prototype.decrypt.mockRestore();
-//         PDF.prototype.hash.mockRestore();
-//     });
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Please select a hashed PDF file');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//     test('no hashed pdf', () => {
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 public_key: 'test'
-//             },
-//             file: {
-//                 filename: 'test.pdf',
-//                 path: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+    test('no normal pdf', () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            body: {
+                public_key: 'test',
+                hashed_pdf: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//         compareHashPDF(req, res);
+        compareHashPDF(req, res);
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Please select a hashed PDF file');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Please upload a normal PDF file');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//     test('no normal pdf', () => {
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 public_key: 'test',
-//                 hashed_pdf: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+    test('no public key', () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            file: {
+                filename: 'test.pdf',
+                path: 'test.pdf'
+            },
+            body: {
+                hashed_pdf: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//         compareHashPDF(req, res);
+        compareHashPDF(req, res);
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Please upload a normal PDF file');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Please enter a public key');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-//     test('same pdf', () => {
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 public_key: 'test',
-//                 hashed_pdf: 'test.pdf'
-//             },
-//             file: {
-//                 filename: 'test.pdf',
-//                 path: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+    test('public key too short or too long', () => {
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            },
+            file: {
+                filename: 'test.pdf',
+                path: 'test.pdf'
+            },
+            body: {
+                public_key: 'testtesttesttesttesttesttesttesttest',
+                hashed_pdf: 'test.pdf'
+            }
+        });
+        const res = mockResponse();
 
-//         compareHashPDF(req, res);
+        compareHashPDF(req, res);
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf and test.pdf are the same file');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Public Key must be 1-32 characters long');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
+});
 
-//     test('different pdf', () => {
-//         PDF.prototype.decrypt = jest.fn().mockReturnValue('decryptedsignature');
-//         PDF.prototype.hash = jest.fn().mockReturnValue('hashedsignature');
+describe('uploadPDF Controller', () => {
+    test('pdfs uploaded', async () => {
+        const req = mockRequest({
+            user: { id: 1 },
+            files: [{ originalname: 'test.pdf' }, { originalname: 'test2.pdf' }]
+        });
+        const res = mockResponse();
 
-//         const req = mockRequest({
-//             body: {
-//                 private_key: 'test',
-//                 public_key: 'test',
-//                 hashed_pdf: 'test.pdf'
-//             },
-//             file: {
-//                 filename: 'test.pdf',
-//                 path: 'test.pdf'
-//             }
-//         });
-//         const res = mockResponse();
+        path.join = jest.fn().mockReturnValue('test.pdf');
+        UploadedPDF.create = jest.fn();
 
-//         compareHashPDF(req, res);
+        await uploadPDF(req, res);
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf and test.pdf are not the same file');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
-// });
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Successfully uploaded 2 file(s)');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
 
-// describe('uploadPDF Controller', () => {
-//     test('pdfs uploaded', () => {
-//         const req = mockRequest({
-//             files: [{ originalname: 'test.pdf' }, { originalname: 'test2.pdf' }]
-//         });
-//         const res = mockResponse();
+    test('no pdfs uploaded', () => {
+        const req = mockRequest({ files: [] });
+        const res = mockResponse();
 
-//         uploadPDF(req, res);
+        uploadPDF(req, res);
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Successfully uploaded 2 file(s)');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Please select one or more files to upload');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
+});
 
-//     test('no pdfs uploaded', () => {
-//         const req = mockRequest({
-//             files: []
-//         });
-//         const res = mockResponse();
+test('deletePDF Controller', async () => {
+    const req = mockRequest({
+        user: { id: 1 },
+        body: { deleted_pdf: 'test.pdf' }
+    });
+    const res = mockResponse();
 
-//         uploadPDF(req, res);
+    fs.unlinkSync = jest.fn();
+    UploadedPDF.deleteByPDFName = jest.fn();
 
-//         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-//         expect(req.flash).toHaveBeenCalledWith('message', 'Please select one or more files to upload');
-//         expect(res.redirect).toHaveBeenCalledWith('/');
-//     });
-// });
+    await deletePDF(req, res);
 
-// test('deletePDF Controller', () => {
-//     fs.unlinkSync = jest.fn();
-//     removeData = jest.fn();
+    expect(req.flash).toHaveBeenCalledWith('type', 'success');
+    expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted test.pdf');
+    expect(res.redirect).toHaveBeenCalledWith('/');
+});
 
-//     const req = mockRequest({
-//         body: { deleted_pdf: 'test.pdf' }
-//     });
-//     const res = mockResponse();
+test('deleteAllPDF Controller', async () => {
+    const req = mockRequest({ user: { id: 1 } });
+    const res = mockResponse();
 
-//     deletePDF(req, res);
+    UploadedPDF.findByUploaderId = jest.fn().mockReturnValue([{ name: 'test.pdf' }, { name: 'test2.pdf' }]);
+    fs.readdirSync = jest.fn().mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
+    UploadedPDF.deleteByUploaderId = jest.fn();
+    fs.unlinkSync = jest.fn();
 
-//     expect(req.flash).toHaveBeenCalledWith('type', 'success');
-//     expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted test.pdf');
-//     expect(res.redirect).toHaveBeenCalledWith('/');
-// });
+    await deleteAllPDF(req, res);
 
-// test('deleteAllPDF Controller', () => {
-//     fs.readdirSync = jest.fn().mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
-//     fs.unlinkSync = jest.fn();
-
-//     const req = mockRequest();
-//     const res = mockResponse();
-
-//     deleteAllPDF(req, res);
-
-//     expect(req.flash).toHaveBeenCalledWith('type', 'success');
-//     expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
-//     expect(res.redirect).toHaveBeenCalledWith('/');
-// });
+    expect(req.flash).toHaveBeenCalledWith('type', 'success');
+    expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
+    expect(res.redirect).toHaveBeenCalledWith('/');
+});

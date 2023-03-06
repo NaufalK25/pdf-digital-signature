@@ -7,7 +7,9 @@ describe('destination', () => {
             mimetype: 'application/pdf'
         };
         const cb = jest.fn();
+
         destination(req, file, cb);
+
         expect(cb).toHaveBeenCalledWith(null, 'uploads');
     });
 
@@ -17,7 +19,9 @@ describe('destination', () => {
             mimetype: 'image/png'
         };
         const cb = jest.fn();
+
         destination(req, file, cb);
+
         expect(cb).toHaveBeenCalledWith(new Error('Only PDF files are allowed!'));
     });
 });
@@ -30,6 +34,8 @@ test('filename', () => {
         originalname: 'test.pdf'
     };
     const cb = jest.fn();
+
     filename(req, file, cb);
+
     expect(cb).toHaveBeenCalledWith(null, `${Date.now()}-test.pdf`);
 });

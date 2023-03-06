@@ -44,7 +44,6 @@ const signPDF = async (req, res) => {
 
     req.flash('type', 'success');
     req.flash('message', `File ${pdf} has been signed`);
-
     res.redirect('/');
 };
 
