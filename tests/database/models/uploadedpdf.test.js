@@ -10,10 +10,14 @@ const mockUploadedPDF = {
 };
 
 beforeAll(() => {
-    UploadedPDF.findAll = jest.fn().mockReturnValue([mockUploadedPDF]);
-    UploadedPDF.findOne = jest.fn().mockReturnValue(mockUploadedPDF);
-    UploadedPDF.update = jest.fn().mockReturnValue([1]);
-    UploadedPDF.destroy = jest.fn().mockReturnValue(1);
+    jest.spyOn(UploadedPDF, 'findAll').mockResolvedValue([mockUploadedPDF]);
+    jest.spyOn(UploadedPDF, 'findOne').mockResolvedValue(mockUploadedPDF);
+    jest.spyOn(UploadedPDF, 'update').mockResolvedValue([1]);
+    jest.spyOn(UploadedPDF, 'destroy').mockResolvedValue(1);
+});
+
+afterAll(() => {
+    jest.restoreAllMocks();
 });
 
 test('Find uploaded PDFs by uploader ID', async () => {

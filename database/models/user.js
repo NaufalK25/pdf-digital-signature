@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         static async findByUsername(username) {
             return await this.findOne({ where: { username } });
         }
-        
+
         static async generatePrivateKey(username) {
             const user = await this.findByUsername(username);
             return user.password.substring(0, 16);

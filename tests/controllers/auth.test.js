@@ -18,7 +18,6 @@ const mockResponse = () => {
 };
 
 jest.mock('express-validator');
-jest.mock('../../database/models');
 
 describe('getRegister controller', () => {
     test('with user', () => {
@@ -104,10 +103,20 @@ describe('getLogin controller', () => {
 
 describe('postRegister controller', () => {
     beforeAll(() => {
-        User.create = jest.fn();
+        jest.spyOn(User, 'create').mockResolvedValue({});
+    });
+
+    afterAll(() => {
+        jest.restoreAllMocks();
     });
 
     test('success', async () => {
+        validationResult.mockReturnValue({
+            isEmpty: jest.fn().mockReturnValue(true),
+            array: jest.fn().mockReturnValue([])
+        });
+        jest.spyOn(BLAKE2s.prototype, 'hexDigest').mockReturnValue('test');
+
         const req = mockRequest({
             body: {
                 username: 'test',
@@ -116,12 +125,6 @@ describe('postRegister controller', () => {
             }
         });
         const res = mockResponse();
-
-        validationResult.mockReturnValue({
-            isEmpty: jest.fn().mockReturnValue(true),
-            array: jest.fn().mockReturnValue([])
-        });
-        BLAKE2s.prototype.hexDigest = jest.fn().mockReturnValue('test');
 
         await postRegister(req, res);
 
@@ -135,6 +138,11 @@ describe('postRegister controller', () => {
     });
 
     test('validation error', async () => {
+        validationResult.mockReturnValue({
+            isEmpty: jest.fn().mockReturnValue(false),
+            array: jest.fn().mockReturnValue([{ msg: 'test' }])
+        });
+
         const req = mockRequest({
             body: {
                 username: '',
@@ -144,11 +152,6 @@ describe('postRegister controller', () => {
         });
         const res = mockResponse();
 
-        validationResult.mockReturnValue({
-            isEmpty: jest.fn().mockReturnValue(false),
-            array: jest.fn().mockReturnValue([{ msg: 'test' }])
-        });
-
         await postRegister(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
@@ -157,6 +160,11 @@ describe('postRegister controller', () => {
     });
 
     test('password does not match', async () => {
+        validationResult.mockReturnValue({
+            isEmpty: jest.fn().mockReturnValue(true),
+            array: jest.fn().mockReturnValue([])
+        });
+
         const req = mockRequest({
             body: {
                 username: 'test',
@@ -165,11 +173,6 @@ describe('postRegister controller', () => {
             }
         });
         const res = mockResponse();
-
-        validationResult.mockReturnValue({
-            isEmpty: jest.fn().mockReturnValue(true),
-            array: jest.fn().mockReturnValue([])
-        });
 
         await postRegister(req, res);
 

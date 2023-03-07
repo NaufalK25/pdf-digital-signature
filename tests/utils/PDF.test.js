@@ -12,6 +12,10 @@ const expectedHash = 'd9b4a76e957a753ef37644e5ca98b910c59b9ad981d6db0cbe2b1db9c4
 
 const mockRequest = ({ user } = {}) => ({ user });
 
+afterAll(() => {
+    jest.restoreAllMocks();
+});
+
 test('constructor', () => {
     const pdf = new PDF(pdfName);
     expect(pdf.filePath).toBe(pdfName);
@@ -24,8 +28,8 @@ test('hash', () => {
 });
 
 test('decrypt', async () => {
-    UploadedPDF.getChecksumByPDFName = jest.fn().mockReturnValue(expectedHash);
-    AES.prototype.decrypt = jest.fn().mockReturnValue(expectedHash);
+    jest.spyOn(UploadedPDF, 'getChecksumByPDFName').mockResolvedValue(expectedHash);
+    jest.spyOn(AES.prototype, 'decrypt').mockReturnValue(expectedHash);
 
     const req = mockRequest({ user: { id: 1 } });
     const decryptedHash = await new PDF(testPDF).decrypt(req, privateKey);
@@ -34,7 +38,7 @@ test('decrypt', async () => {
 });
 
 test('sign', () => {
-    UploadedPDF.updateByPDFName = jest.fn().mockReturnValue([1]);
+    jest.spyOn(UploadedPDF, 'updateByPDFName').mockResolvedValue([1]);
 
     const req = mockRequest({ user: { id: 1 } });
     new PDF(path.join(rootDir, 'tests', 'test2.pdf')).sign(req, privateKey, publicKey);

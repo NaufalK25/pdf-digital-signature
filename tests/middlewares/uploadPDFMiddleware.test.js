@@ -27,7 +27,7 @@ describe('destination', () => {
 });
 
 test('filename', () => {
-    Date.now = jest.fn(() => 123456789);
+    jest.spyOn(Date, 'now').mockReturnValue(123456789);
 
     const req = {};
     const file = {
@@ -38,4 +38,6 @@ test('filename', () => {
     filename(req, file, cb);
 
     expect(cb).toHaveBeenCalledWith(null, `${Date.now()}-test.pdf`);
+
+    jest.restoreAllMocks();
 });

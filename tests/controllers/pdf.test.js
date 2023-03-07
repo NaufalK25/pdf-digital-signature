@@ -19,17 +19,12 @@ const mockResponse = () => {
 };
 
 describe('getRoot Controller', () => {
-    test('with user', async () => {
-        const req = mockRequest({
-            user: {
-                id: 1,
-                username: 'test',
-                password: 'test'
-            }
-        });
-        const res = mockResponse();
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
 
-        UploadedPDF.findByUploaderId = jest.fn().mockReturnValue([
+    test('with user', async () => {
+        jest.spyOn(UploadedPDF, 'findByUploaderId').mockResolvedValue([
             {
                 name: 'test.pdf',
                 url: `uploads${path.sep}test.pdf`,
@@ -45,6 +40,15 @@ describe('getRoot Controller', () => {
                 publicKey: null
             }
         ]);
+
+        const req = mockRequest({
+            user: {
+                id: 1,
+                username: 'test',
+                password: 'test'
+            }
+        });
+        const res = mockResponse();
 
         await getRoot(req, res);
 
@@ -96,10 +100,21 @@ describe('getRoot Controller', () => {
 
 describe('signPDF Controller', () => {
     beforeAll(() => {
-        PDF.prototype.sign = jest.fn();
+        jest.spyOn(PDF.prototype, 'sign').mockImplementation(() => Promise.resolve());
+    });
+
+    afterAll(() => {
+        jest.restoreAllMocks();
     });
 
     test('pdf signed', async () => {
+        jest.spyOn(User, 'generatePrivateKey').mockResolvedValue('test');
+        jest.spyOn(User, 'findByUsername').mockResolvedValue({
+            id: 1,
+            username: 'test',
+            password: 'test'
+        });
+
         const req = mockRequest({
             user: {
                 id: 1,
@@ -112,13 +127,6 @@ describe('signPDF Controller', () => {
             }
         });
         const res = mockResponse();
-
-        User.generatePrivateKey = jest.fn().mockReturnValue('test');
-        User.findByUsername = jest.fn().mockReturnValue({
-            id: 1,
-            username: 'test',
-            password: 'test'
-        });
 
         await signPDF(req, res);
 
@@ -164,16 +172,23 @@ describe('signPDF Controller', () => {
 
 describe('compareHashPDF Controller', () => {
     beforeAll(() => {
-        fs.unlinkSync = jest.fn();
-        User.generatePrivateKey = jest.fn().mockReturnValue('test');
-        User.findByUsername = jest.fn().mockReturnValue({
+        jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+        jest.spyOn(User, 'generatePrivateKey').mockResolvedValue('test');
+        jest.spyOn(User, 'findByUsername').mockResolvedValue({
             id: 1,
             username: 'test',
             password: 'test'
         });
     });
 
+    afterAll(() => {
+        jest.restoreAllMocks();
+    });
+
     test('same pdf', async () => {
+        jest.spyOn(PDF.prototype, 'decrypt').mockResolvedValue('signature');
+        jest.spyOn(PDF.prototype, 'hash').mockReturnValue('signature');
+
         const req = mockRequest({
             user: {
                 id: 1,
@@ -190,9 +205,6 @@ describe('compareHashPDF Controller', () => {
             }
         });
         const res = mockResponse();
-
-        PDF.prototype.decrypt = jest.fn().mockReturnValue('signature');
-        PDF.prototype.hash = jest.fn().mockReturnValue('signature');
 
         await compareHashPDF(req, res);
 
@@ -202,6 +214,9 @@ describe('compareHashPDF Controller', () => {
     });
 
     test('different pdf', async () => {
+        jest.spyOn(PDF.prototype, 'decrypt').mockResolvedValue('decryptsignature');
+        jest.spyOn(PDF.prototype, 'hash').mockReturnValue('hashsignature');
+
         const req = mockRequest({
             user: {
                 id: 1,
@@ -218,9 +233,6 @@ describe('compareHashPDF Controller', () => {
             }
         });
         const res = mockResponse();
-
-        PDF.prototype.decrypt = jest.fn().mockReturnValue('decryptsignature');
-        PDF.prototype.hash = jest.fn().mockReturnValue('hashsignature');
 
         await compareHashPDF(req, res);
 
@@ -323,26 +335,19 @@ describe('compareHashPDF Controller', () => {
 });
 
 describe('uploadPDF Controller', () => {
-    let joinMock;
-
-    beforeAll(() => {
-        joinMock = jest.fn();
-        jest.spyOn(path, 'join').mockImplementation(joinMock);
-    });
-
     afterAll(() => {
         jest.restoreAllMocks();
     });
 
     test('pdfs uploaded', async () => {
+        jest.spyOn(path, 'join').mockReturnValue('test.pdf');
+        jest.spyOn(UploadedPDF, 'create').mockResolvedValue({});
+
         const req = mockRequest({
             user: { id: 1 },
             files: [{ originalname: 'test.pdf' }, { originalname: 'test2.pdf' }]
         });
         const res = mockResponse();
-
-        joinMock.mockReturnValue('test.pdf');
-        UploadedPDF.create = jest.fn();
 
         await uploadPDF(req, res);
 
@@ -364,47 +369,38 @@ describe('uploadPDF Controller', () => {
 });
 
 test('deletePDF Controller', async () => {
+    jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+    jest.spyOn(UploadedPDF, 'deleteByPDFName').mockResolvedValue({});
+
     const req = mockRequest({
         user: { id: 1 },
         body: { deleted_pdf: 'test.pdf' }
     });
     const res = mockResponse();
 
-    fs.unlinkSync = jest.fn();
-    UploadedPDF.deleteByPDFName = jest.fn();
-
     await deletePDF(req, res);
 
     expect(req.flash).toHaveBeenCalledWith('type', 'success');
     expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted test.pdf');
     expect(res.redirect).toHaveBeenCalledWith('/');
+
+    jest.restoreAllMocks();
 });
 
-describe('deleteAllPDF Controller', () => {
-    let readdirSyncMock;
+test('deleteAllPDF Controller', async () => {
+    jest.spyOn(UploadedPDF, 'findByUploaderId').mockResolvedValue([{ name: 'test.pdf' }, { name: 'test2.pdf' }]);
+    jest.spyOn(fs, 'readdirSync').mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
+    jest.spyOn(UploadedPDF, 'deleteByUploaderId').mockResolvedValue(1);
+    jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
 
-    beforeAll(() => {
-        readdirSyncMock = jest.fn();
-        jest.spyOn(fs, 'readdirSync').mockImplementation(readdirSyncMock);
-    });
+    const req = mockRequest({ user: { id: 1 } });
+    const res = mockResponse();
 
-    afterAll(() => {
-        jest.restoreAllMocks();
-    });
+    await deleteAllPDF(req, res);
 
-    test('success', async () => {
-        const req = mockRequest({ user: { id: 1 } });
-        const res = mockResponse();
+    expect(req.flash).toHaveBeenCalledWith('type', 'success');
+    expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
+    expect(res.redirect).toHaveBeenCalledWith('/');
 
-        UploadedPDF.findByUploaderId = jest.fn().mockReturnValue([{ name: 'test.pdf' }, { name: 'test2.pdf' }]);
-        readdirSyncMock.mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
-        UploadedPDF.deleteByUploaderId = jest.fn();
-        fs.unlinkSync = jest.fn();
-
-        await deleteAllPDF(req, res);
-
-        expect(req.flash).toHaveBeenCalledWith('type', 'success');
-        expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
-        expect(res.redirect).toHaveBeenCalledWith('/');
-    });
+    jest.restoreAllMocks();
 });

@@ -6,7 +6,11 @@ const mockUser = {
 };
 
 beforeAll(() => {
-    User.findOne = jest.fn().mockReturnValue(mockUser);
+    jest.spyOn(User, 'findOne').mockResolvedValue(mockUser);
+});
+
+afterAll(() => {
+    jest.restoreAllMocks();
 });
 
 test('Find user by username', async () => {
