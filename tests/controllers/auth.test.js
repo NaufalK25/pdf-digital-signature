@@ -107,6 +107,33 @@ describe('postRegister controller', () => {
         User.create = jest.fn();
     });
 
+    test('success', async () => {
+        const req = mockRequest({
+            body: {
+                username: 'test',
+                password: 'test',
+                confirmPassword: 'test'
+            }
+        });
+        const res = mockResponse();
+
+        validationResult.mockReturnValue({
+            isEmpty: jest.fn().mockReturnValue(true),
+            array: jest.fn().mockReturnValue([])
+        });
+        BLAKE2s.prototype.hexDigest = jest.fn().mockReturnValue('test');
+
+        await postRegister(req, res);
+
+        expect(User.create).toHaveBeenCalledWith({
+            username: req.body.username,
+            password: 'test'
+        });
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'You have been registered successfully');
+        expect(res.redirect).toHaveBeenCalledWith('/login');
+    });
+
     test('validation error', async () => {
         const req = mockRequest({
             body: {
@@ -149,33 +176,6 @@ describe('postRegister controller', () => {
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Password does not match');
         expect(res.redirect).toHaveBeenCalledWith('/register');
-    });
-
-    test('success', async () => {
-        const req = mockRequest({
-            body: {
-                username: 'test',
-                password: 'test',
-                confirmPassword: 'test'
-            }
-        });
-        const res = mockResponse();
-
-        validationResult.mockReturnValue({
-            isEmpty: jest.fn().mockReturnValue(true),
-            array: jest.fn().mockReturnValue([])
-        });
-        BLAKE2s.prototype.hexDigest = jest.fn().mockReturnValue('test');
-
-        await postRegister(req, res);
-
-        expect(User.create).toHaveBeenCalledWith({
-            username: req.body.username,
-            password: 'test'
-        });
-        expect(req.flash).toHaveBeenCalledWith('type', 'success');
-        expect(req.flash).toHaveBeenCalledWith('message', 'You have been registered successfully');
-        expect(res.redirect).toHaveBeenCalledWith('/login');
     });
 });
 
