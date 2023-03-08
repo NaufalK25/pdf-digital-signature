@@ -1,6 +1,6 @@
 const Matrix = require('../../utils/Matrix');
 
-test('constructor', () => {
+test('constructor method should create new matrix instance', () => {
     const matrix = new Matrix([
         [1, 2],
         [3, 4]
@@ -13,7 +13,7 @@ test('constructor', () => {
     expect(matrix.height).toBe(2);
 });
 
-test('createFromText', () => {
+test('createFromText method should create new matrix instance from text', () => {
     const matrix = Matrix.createFromText('abcdefgh');
     expect(matrix.matrix).toEqual([
         [97, 98, 99, 100],
@@ -23,7 +23,7 @@ test('createFromText', () => {
     expect(matrix.height).toBe(2);
 });
 
-test('transpose', () => {
+test('transpose method should transpose the matrix', () => {
     const matrix = new Matrix([
         [1, 2],
         [3, 4]
@@ -35,7 +35,7 @@ test('transpose', () => {
     ]);
 });
 
-test('flat', () => {
+test('flat method should flatten the matrix from 2D to 1D', () => {
     const matrix = new Matrix([
         [1, 2],
         [3, 4]
@@ -44,7 +44,7 @@ test('flat', () => {
     expect(matrix.matrix).toEqual([1, 2, 3, 4]);
 });
 
-test('convertValue', () => {
+test('convertValue method should convert the value of the matrix', () => {
     const matrix = new Matrix([
         [1, 2],
         [3, 4]
@@ -56,7 +56,7 @@ test('convertValue', () => {
     ]);
 });
 
-test('xor', () => {
+test('xor method should xor the matrix with another matrix', () => {
     const matrix = new Matrix([
         ['00000001', '00000010'],
         ['00000011', '00000100']

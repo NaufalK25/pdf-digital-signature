@@ -18,12 +18,12 @@ const mockResponse = () => {
     return res;
 };
 
-describe('getRoot Controller', () => {
+describe('getRoot controller', () => {
     afterAll(() => {
         jest.restoreAllMocks();
     });
 
-    test('with user', async () => {
+    test('should render the home page if user is logged in', async () => {
         jest.spyOn(UploadedPDF, 'findByUploaderId').mockResolvedValue([
             {
                 name: 'test.pdf',
@@ -79,7 +79,7 @@ describe('getRoot Controller', () => {
         });
     });
 
-    test('no user', () => {
+    test('should render the home page if user is not logged in', async () => {
         const req = mockRequest({ user: null });
         const res = mockResponse();
 
@@ -98,7 +98,7 @@ describe('getRoot Controller', () => {
     });
 });
 
-describe('signPDF Controller', () => {
+describe('signPDF controller', () => {
     beforeAll(() => {
         jest.spyOn(PDF.prototype, 'sign').mockImplementation(() => Promise.resolve());
     });
@@ -107,7 +107,7 @@ describe('signPDF Controller', () => {
         jest.restoreAllMocks();
     });
 
-    test('pdf signed', async () => {
+    test('should sign the pdf', async () => {
         jest.spyOn(User, 'generatePrivateKey').mockResolvedValue('test');
         jest.spyOn(User, 'findByUsername').mockResolvedValue({
             id: 1,
@@ -135,7 +135,7 @@ describe('signPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('no public key', () => {
+    test('should redirect to / and give flash error message if there is no public key', () => {
         const req = mockRequest({
             user: {
                 id: 1,
@@ -153,7 +153,7 @@ describe('signPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('public key too short or too long', () => {
+    test('should redirect to / and give flash error message if the public key is either too short or too long', () => {
         const req = mockRequest({
             body: {
                 public_key: 'testtesttesttesttesttesttesttesttest',
@@ -170,7 +170,7 @@ describe('signPDF Controller', () => {
     });
 });
 
-describe('compareHashPDF Controller', () => {
+describe('compareHashPDF controller', () => {
     beforeAll(() => {
         jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
         jest.spyOn(User, 'generatePrivateKey').mockResolvedValue('test');
@@ -185,7 +185,7 @@ describe('compareHashPDF Controller', () => {
         jest.restoreAllMocks();
     });
 
-    test('same pdf', async () => {
+    test('should give same pdf flash if the pdfs are the same', async () => {
         jest.spyOn(PDF.prototype, 'decrypt').mockResolvedValue('signature');
         jest.spyOn(PDF.prototype, 'hash').mockReturnValue('signature');
 
@@ -213,7 +213,7 @@ describe('compareHashPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('different pdf', async () => {
+    test('should give different pdf flash if the pdfs are not the same', async () => {
         jest.spyOn(PDF.prototype, 'decrypt').mockResolvedValue('decryptsignature');
         jest.spyOn(PDF.prototype, 'hash').mockReturnValue('hashsignature');
 
@@ -241,7 +241,7 @@ describe('compareHashPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('no hashed pdf', () => {
+    test('should redirect to / and give flash error message if there is no hashed pdf', () => {
         const req = mockRequest({
             user: {
                 id: 1,
@@ -263,7 +263,7 @@ describe('compareHashPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('no normal pdf', () => {
+    test('should redirect to / and give flash error message if there is no normal pdf', () => {
         const req = mockRequest({
             user: {
                 id: 1,
@@ -284,7 +284,7 @@ describe('compareHashPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('no public key', () => {
+    test('should redirect to / and give flash error message if there is no public key', () => {
         const req = mockRequest({
             user: {
                 id: 1,
@@ -308,7 +308,7 @@ describe('compareHashPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('public key too short or too long', () => {
+    test('should redirect to / and give flash error message if the public key is either too short or too long', () => {
         const req = mockRequest({
             user: {
                 id: 1,
@@ -334,12 +334,12 @@ describe('compareHashPDF Controller', () => {
     });
 });
 
-describe('uploadPDF Controller', () => {
+describe('uploadPDF controller', () => {
     afterAll(() => {
         jest.restoreAllMocks();
     });
 
-    test('pdfs uploaded', async () => {
+    test('should upload one or more pdfs', async () => {
         jest.spyOn(path, 'join').mockReturnValue('test.pdf');
         jest.spyOn(UploadedPDF, 'create').mockResolvedValue({});
 
@@ -356,7 +356,7 @@ describe('uploadPDF Controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('no pdfs uploaded', () => {
+    test('should redirect to / and give flash error message if there are no files', () => {
         const req = mockRequest({ files: [] });
         const res = mockResponse();
 
@@ -368,39 +368,43 @@ describe('uploadPDF Controller', () => {
     });
 });
 
-test('deletePDF Controller', async () => {
-    jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
-    jest.spyOn(UploadedPDF, 'deleteByPDFName').mockResolvedValue({});
+describe('deletePDF controller', () => {
+    test('should delete a pdf', async () => {
+        jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+        jest.spyOn(UploadedPDF, 'deleteByPDFName').mockResolvedValue({});
 
-    const req = mockRequest({
-        user: { id: 1 },
-        body: { deleted_pdf: 'test.pdf' }
+        const req = mockRequest({
+            user: { id: 1 },
+            body: { deleted_pdf: 'test.pdf' }
+        });
+        const res = mockResponse();
+
+        await deletePDF(req, res);
+
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted test.pdf');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+
+        jest.restoreAllMocks();
     });
-    const res = mockResponse();
-
-    await deletePDF(req, res);
-
-    expect(req.flash).toHaveBeenCalledWith('type', 'success');
-    expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted test.pdf');
-    expect(res.redirect).toHaveBeenCalledWith('/');
-
-    jest.restoreAllMocks();
 });
 
-test('deleteAllPDF Controller', async () => {
-    jest.spyOn(UploadedPDF, 'findByUploaderId').mockResolvedValue([{ name: 'test.pdf' }, { name: 'test2.pdf' }]);
-    jest.spyOn(fs, 'readdirSync').mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
-    jest.spyOn(UploadedPDF, 'deleteByUploaderId').mockResolvedValue(1);
-    jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+describe('deleteAllPDF controller', () => {
+    test('should delete all pdfs', async () => {
+        jest.spyOn(UploadedPDF, 'findByUploaderId').mockResolvedValue([{ name: 'test.pdf' }, { name: 'test2.pdf' }]);
+        jest.spyOn(fs, 'readdirSync').mockReturnValue(['test.pdf', 'test2.pdf', '.gitkeep']);
+        jest.spyOn(UploadedPDF, 'deleteByUploaderId').mockResolvedValue(1);
+        jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
 
-    const req = mockRequest({ user: { id: 1 } });
-    const res = mockResponse();
+        const req = mockRequest({ user: { id: 1 } });
+        const res = mockResponse();
 
-    await deleteAllPDF(req, res);
+        await deleteAllPDF(req, res);
 
-    expect(req.flash).toHaveBeenCalledWith('type', 'success');
-    expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
-    expect(res.redirect).toHaveBeenCalledWith('/');
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
+        expect(res.redirect).toHaveBeenCalledWith('/');
 
-    jest.restoreAllMocks();
+        jest.restoreAllMocks();
+    });
 });

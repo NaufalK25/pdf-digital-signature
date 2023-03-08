@@ -1,3 +1,4 @@
+const passport = require('passport');
 const { validationResult } = require('express-validator');
 const BLAKE2s = require('../../utils/BLAKE2s');
 const { getLogin, getRegister, postLogin, postLogout, postRegister } = require('../../controllers/auth');
@@ -17,32 +18,11 @@ const mockResponse = () => {
     return res;
 };
 
+jest.mock('passport');
 jest.mock('express-validator');
 
 describe('getRegister controller', () => {
-    test('with user', () => {
-        const req = mockRequest({
-            user: {
-                name: 'test',
-                password: 'test'
-            }
-        });
-        const res = mockResponse();
-
-        getRegister(req, res);
-
-        expect(res.render).toHaveBeenCalledWith('register', {
-            title: 'Register | PDF Digital Signature',
-            activeNav: 'register',
-            loggedInUser: req.user || null,
-            flash: {
-                type: req.flash('type') || '',
-                message: req.flash('message') || ''
-            }
-        });
-    });
-
-    test('no user', () => {
+    test('should render the register page', () => {
         const req = mockRequest();
         const res = mockResponse();
 
@@ -61,29 +41,7 @@ describe('getRegister controller', () => {
 });
 
 describe('getLogin controller', () => {
-    test('with user', () => {
-        const req = mockRequest({
-            user: {
-                name: 'test',
-                password: 'test'
-            }
-        });
-        const res = mockResponse();
-
-        getLogin(req, res);
-
-        expect(res.render).toHaveBeenCalledWith('login', {
-            title: 'Login | PDF Digital Signature',
-            activeNav: 'login',
-            loggedInUser: req.user || null,
-            flash: {
-                type: req.flash('type') || '',
-                message: req.flash('message') || ''
-            }
-        });
-    });
-
-    test('no user', () => {
+    test('should render the login page', () => {
         const req = mockRequest();
         const res = mockResponse();
 
@@ -110,7 +68,7 @@ describe('postRegister controller', () => {
         jest.restoreAllMocks();
     });
 
-    test('success', async () => {
+    test('should register the new user', async () => {
         validationResult.mockReturnValue({
             isEmpty: jest.fn().mockReturnValue(true),
             array: jest.fn().mockReturnValue([])
@@ -137,7 +95,7 @@ describe('postRegister controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/login');
     });
 
-    test('validation error', async () => {
+    test('should redirect to /login and give flash error message if validation fails', async () => {
         validationResult.mockReturnValue({
             isEmpty: jest.fn().mockReturnValue(false),
             array: jest.fn().mockReturnValue([{ msg: 'test' }])
@@ -159,7 +117,7 @@ describe('postRegister controller', () => {
         expect(res.redirect).toHaveBeenCalledWith('/register');
     });
 
-    test('password does not match', async () => {
+    test('should redirect to /login and give flash error message if password does not match', async () => {
         validationResult.mockReturnValue({
             isEmpty: jest.fn().mockReturnValue(true),
             array: jest.fn().mockReturnValue([])
@@ -182,8 +140,132 @@ describe('postRegister controller', () => {
     });
 });
 
-describe('postLogout', () => {
-    test('success', () => {
+describe('postLogin', () => {
+    let req, res;
+
+    beforeAll(() => {
+        req = mockRequest();
+        res = mockResponse();
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test('should redirect to /login and give flash error message if pasport authentication error', () => {
+        passport.authenticate = jest.fn().mockImplementationOnce((strategy, callback) => (req, res) => {
+            callback(new Error('Authentication error'));
+        });
+
+        postLogin(req, res);
+
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+        expect(res.redirect).toHaveBeenCalledWith('/login');
+    });
+
+    describe('user not found', () => {
+        test('should redirect to /login and give flash error message if user not found (error message available)', () => {
+            passport.authenticate.mockImplementationOnce((strategy, callback) => (req, res) => {
+                callback(null, false, { param: 'username', message: 'Username or Password is incorrect' });
+            });
+
+            postLogin(req, res);
+
+            expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+            expect(req.flash).toHaveBeenCalledWith('message', 'Username or Password is incorrect');
+            expect(res.redirect).toHaveBeenCalledWith('/login');
+        });
+
+        test('should redirect to /login and give flash error message if user not found (error message unavailable)', () => {
+            passport.authenticate.mockImplementationOnce((strategy, callback) => (req, res) => {
+                callback(null, false, {});
+            });
+
+            postLogin(req, res);
+
+            expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+            expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+            expect(res.redirect).toHaveBeenCalledWith('/login');
+        });
+    });
+
+    test('should redirect to /login and give flash error message if login error', () => {
+        passport.authenticate.mockImplementationOnce((strategy, callback) => (req, res) => {
+            callback(
+                null,
+                {
+                    id: 1,
+                    username: 'test',
+                    password: 'test'
+                },
+                { message: 'Logged in Successfully' }
+            );
+        });
+        req.login.mockImplementationOnce((user, callback) => {
+            callback(new Error('Login error'));
+        });
+
+        postLogin(req, res);
+
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+        expect(res.redirect).toHaveBeenCalledWith('/login');
+    });
+
+    test('should redirect to /login if validation fails', () => {
+        passport.authenticate.mockImplementationOnce((strategy, callback) => (req, res) => {
+            callback(
+                null,
+                {
+                    id: 1,
+                    username: 'test',
+                    password: 'test'
+                },
+                { message: 'Logged in Successfully' }
+            );
+        });
+        req.login.mockImplementationOnce((user, callback) => callback(null));
+        validationResult.mockReturnValueOnce({
+            isEmpty: jest.fn(() => false),
+            array: jest.fn(() => [{ msg: 'Validation error' }])
+        });
+
+        postLogin(req, res);
+
+        expect(req.flash).toHaveBeenCalledWith('type', 'danger');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Validation error');
+        expect(res.redirect).toHaveBeenCalledWith('/login');
+    });
+
+    test('should login the user', () => {
+        passport.authenticate.mockImplementationOnce((strategy, callback) => (req, res) => {
+            callback(
+                null,
+                {
+                    id: 1,
+                    username: 'test',
+                    password: 'test'
+                },
+                { message: 'Logged in Successfully' }
+            );
+        });
+        req.login.mockImplementationOnce((user, callback) => callback(null));
+        validationResult.mockReturnValueOnce({
+            isEmpty: jest.fn(() => true),
+            array: jest.fn(() => [])
+        });
+
+        postLogin(req, res);
+
+        expect(req.flash).toHaveBeenCalledWith('type', 'success');
+        expect(req.flash).toHaveBeenCalledWith('message', 'You have been logged in successfully');
+        expect(res.redirect).toHaveBeenCalledWith('/');
+    });
+});
+
+describe('postLogout controller', () => {
+    test('should logout the user', () => {
         const req = mockRequest();
         const res = mockResponse();
         const error = null;
@@ -198,7 +280,7 @@ describe('postLogout', () => {
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
-    test('error', () => {
+    test('should redirect to / and give flash error message if error occurs', () => {
         const req = mockRequest();
         const res = mockResponse();
         const error = new Error('An error occurred');

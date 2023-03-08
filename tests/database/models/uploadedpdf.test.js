@@ -1,6 +1,6 @@
 const { UploadedPDF } = require('../../../database/models');
 
-const mockUploadedPDF = {
+const UploadedPDFMock = {
     uploaderId: 1,
     name: 'test',
     url: 'test',
@@ -10,8 +10,8 @@ const mockUploadedPDF = {
 };
 
 beforeAll(() => {
-    jest.spyOn(UploadedPDF, 'findAll').mockResolvedValue([mockUploadedPDF]);
-    jest.spyOn(UploadedPDF, 'findOne').mockResolvedValue(mockUploadedPDF);
+    jest.spyOn(UploadedPDF, 'findAll').mockResolvedValue([UploadedPDFMock]);
+    jest.spyOn(UploadedPDF, 'findOne').mockResolvedValue(UploadedPDFMock);
     jest.spyOn(UploadedPDF, 'update').mockResolvedValue([1]);
     jest.spyOn(UploadedPDF, 'destroy').mockResolvedValue(1);
 });
@@ -20,24 +20,22 @@ afterAll(() => {
     jest.restoreAllMocks();
 });
 
-test('Find uploaded PDFs by uploader ID', async () => {
-    const uploadedPDFs = await UploadedPDF.findByUploaderId(mockUploadedPDF.uploaderId);
-
-    expect(uploadedPDFs).toEqual([mockUploadedPDF]);
+test('findByUploaderId method should find pdfs data by given uploader id', async () => {
+    expect(await UploadedPDF.findByUploaderId(UploadedPDFMock.uploaderId)).toEqual([UploadedPDFMock]);
 });
 
-test('Get checksum by PDF name', async () => {
-    expect(await UploadedPDF.getChecksumByPDFName(mockUploadedPDF.uploaderId, mockUploadedPDF.name)).toBe(mockUploadedPDF.checksum);
+test('getChecksumByPDFName method should get pdf checksum by given pdf name', async () => {
+    expect(await UploadedPDF.getChecksumByPDFName(UploadedPDFMock.uploaderId, UploadedPDFMock.name)).toBe(UploadedPDFMock.checksum);
 });
 
-test('Update by PDF name', async () => {
-    expect(await UploadedPDF.updateByPDFName(mockUploadedPDF.uploaderId, mockUploadedPDF.name, mockUploadedPDF)).toEqual([1]);
+test('updateByPDFName method should update PDF data by given PDF name', async () => {
+    expect(await UploadedPDF.updateByPDFName(UploadedPDFMock.uploaderId, UploadedPDFMock.name, UploadedPDFMock)).toEqual([1]);
 });
 
-test('Delete by uploader ID', async () => {
-    expect(await UploadedPDF.deleteByUploaderId(mockUploadedPDF.uploaderId)).toBe(1);
+test('deleteByUploaderId method should delete all pdfs data by given uploader id', async () => {
+    expect(await UploadedPDF.deleteByUploaderId(UploadedPDFMock.uploaderId)).toBe(1);
 });
 
-test('Delete by PDF name', async () => {
-    expect(await UploadedPDF.deleteByPDFName(mockUploadedPDF.uploaderId, mockUploadedPDF.name)).toBe(1);
+test('deleteByPDFName method should delete pdf data by given pdf name', async () => {
+    expect(await UploadedPDF.deleteByPDFName(UploadedPDFMock.uploaderId, UploadedPDFMock.name)).toBe(1);
 });

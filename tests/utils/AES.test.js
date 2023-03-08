@@ -1,21 +1,21 @@
 const AES = require('../../utils/AES');
 
-describe('constructor', () => {
-    test('default', () => {
+describe('constructor method', () => {
+    test('should create new AES instance and generate the key schedule', () => {
         const aes = new AES('testtesttesttest');
         expect(aes.key).toBe('testtesttesttest');
         expect(aes.key.length).toBe(16);
         expect(aes.keySchedule).toBeDefined();
     });
 
-    test('key length less than 16', () => {
+    test('should create new AES instance and generate the key schedule (key length less than 16)', () => {
         const aes = new AES('test');
         expect(aes.key).toBe('test            ');
         expect(aes.key.length).toBe(16);
         expect(aes.keySchedule).toBeDefined();
     });
 
-    test('key length more than 16', () => {
+    test('should create new AES instance and generate the key schedule (key length more than 16)', () => {
         const aes = new AES('testtesttesttesttesttesttesttest');
         expect(aes.key).toBe('testtesttesttest');
         expect(aes.key.length).toBe(16);
@@ -23,14 +23,14 @@ describe('constructor', () => {
     });
 });
 
-describe('encrypt', () => {
-    test('success', () => {
+describe('encrypt method', () => {
+    test('should return an encrypted string', () => {
         const aes = new AES('test');
         const encrypted = aes.encrypt('testtesttesttest');
         expect(encrypted.length % 16).toBe(0);
     });
 
-    test('error', () => {
+    test('should throw an error if plaintext length is not a multiple of 16', () => {
         const aes = new AES('test');
         expect(() => {
             aes.encrypt('testtesttest');
@@ -38,15 +38,15 @@ describe('encrypt', () => {
     });
 });
 
-describe('decrypt', () => {
-    test('success', () => {
+describe('decrypt method', () => {
+    test('should return a decrypted string', () => {
         const aes = new AES('test');
         const encrypted = aes.encrypt('testtesttesttest');
         const decrypted = aes.decrypt(encrypted);
         expect(decrypted).toBe('testtesttesttest');
     });
 
-    test('error', () => {
+    test('should throw an error if ciphertext length is not a multiple of 16', () => {
         const aes = new AES('test');
         const encrypted = aes.encrypt('testtesttesttest');
         expect(() => {

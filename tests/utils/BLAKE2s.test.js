@@ -1,13 +1,13 @@
 const BLAKE2s = require('../../utils/BLAKE2s');
 const { textToDec } = require('../../utils/converter');
 
-describe('constructor', () => {
+describe('constructor method', () => {
     describe('digest length', () => {
-        test('undefined digest length', () => {
+        test('should create new BLAKE2s instance even if digest length is not specified', () => {
             expect(new BLAKE2s()).toBeDefined();
         });
 
-        test('bad digest length', () => {
+        test('should throw an error if the given digest length format is invalid', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(33, ' ');
             const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -16,8 +16,8 @@ describe('constructor', () => {
         });
     });
 
-    describe('key or config', () => {
-        test('key as array', () => {
+    describe('key or config property', () => {
+        test('should create new BLAKE2s instance using array as public key', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(32, ' ');
             const keyBuffer = [...publicKey].map(textToDec);
@@ -26,7 +26,7 @@ describe('constructor', () => {
             expect(blake2s).toBeDefined();
         });
 
-        test('key as uint8array', () => {
+        test('should create new BLAKE2s instance using uint8array as public key', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(32, ' ');
             const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -35,7 +35,7 @@ describe('constructor', () => {
             expect(blake2s).toBeDefined();
         });
 
-        test('key as config object', () => {
+        test('should create new BLAKE2s instance using config object as public key', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(32, ' ');
             const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -48,7 +48,7 @@ describe('constructor', () => {
             expect(blake2s).toBeDefined();
         });
 
-        test('key as config object (zero length key)', () => {
+        test('should create new BLAKE2s instance using config object as public key (zero length key)', () => {
             const blake2s = new BLAKE2s(32, {
                 key: new Uint8Array(0),
                 salt: new Uint8Array(8),
@@ -58,11 +58,11 @@ describe('constructor', () => {
             expect(blake2s).toBeDefined();
         });
 
-        test('invalid key or config', () => {
+        test('should throw an error if the given key or config object is invalid', () => {
             expect(() => new BLAKE2s(32, 'test')).toThrowError('unexpected key or config type');
         });
 
-        test('invalid key on config', () => {
+        test('should throw an error if the given key on config object is invalid', () => {
             expect(
                 () =>
                     new BLAKE2s(32, {
@@ -73,11 +73,11 @@ describe('constructor', () => {
             ).toThrowError('key must be a Uint8Array or an Array of bytes');
         });
 
-        test('invalid config option', () => {
+        test('should throw an error if the given config object option is invalid', () => {
             expect(() => new BLAKE2s(32, { test: 'test' })).toThrowError('unexpected key in config: test');
         });
 
-        test('invalid key length', () => {
+        test('should throw an error if the given key has invalid length', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(33, ' ');
             const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -85,7 +85,7 @@ describe('constructor', () => {
             expect(() => new BLAKE2s(publicKey.length - 1, keyBuffer)).toThrowError('key is too long');
         });
 
-        test('invalid salt length', () => {
+        test('should throw an error if the given salt has invalid length', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(32, ' ');
             const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -99,7 +99,7 @@ describe('constructor', () => {
             ).toThrowError(`salt must be ${BLAKE2s.saltLength} bytes`);
         });
 
-        test('invalid personalization length', () => {
+        test('should throw an error if the given personalization has invalid length', () => {
             let publicKey = 'publicKey';
             publicKey = publicKey.padEnd(32, ' ');
             const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -116,8 +116,8 @@ describe('constructor', () => {
     });
 });
 
-describe('update', () => {
-    test('default', () => {
+describe('update method', () => {
+    test('should process the given data', () => {
         const fileBuffer = Buffer.from('testtesttesttesttesttesttesttest');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
@@ -127,7 +127,17 @@ describe('update', () => {
         expect(() => blake2s.update(fileBuffer)).not.toThrowError();
     });
 
-    test('invalid p', () => {
+    test('should process the given data even if the length is zero', () => {
+        const fileBuffer = Buffer.from('test');
+        let publicKey = 'publicKey';
+        publicKey = publicKey.padEnd(32, ' ');
+        const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
+        const blake2s = new BLAKE2s(publicKey.length, keyBuffer).update(fileBuffer, 0, 0);
+
+        expect(blake2s).toBeDefined();
+    });
+
+    test('should throw an error if the given data is invalid', () => {
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
         const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
@@ -136,7 +146,7 @@ describe('update', () => {
         expect(() => blake2s.update('test')).toThrowError('update() accepts Uint8Array or an Array of bytes');
     });
 
-    test('already finished', () => {
+    test('should throw an error if the given data already has been hashed', () => {
         const fileBuffer = Buffer.from('test');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
@@ -146,20 +156,10 @@ describe('update', () => {
 
         expect(() => blake2s.update(fileBuffer)).toThrowError('update() after calling digest()');
     });
-
-    test('zero length', () => {
-        const fileBuffer = Buffer.from('test');
-        let publicKey = 'publicKey';
-        publicKey = publicKey.padEnd(32, ' ');
-        const keyBuffer = new Uint8Array([...publicKey].map(textToDec));
-        const blake2s = new BLAKE2s(publicKey.length, keyBuffer).update(fileBuffer, 0, 0);
-
-        expect(blake2s).toBeDefined();
-    });
 });
 
-describe('digest', () => {
-    test('default', () => {
+describe('digest method', () => {
+    test('should return the hash of the given data in Uint8Array format', () => {
         const fileBuffer = Buffer.from('testtesttesttesttesttesttesttest');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
@@ -169,7 +169,7 @@ describe('digest', () => {
         expect(byteHash).toEqual(new Uint8Array([206, 91, 251, 9, 151, 31, 78, 228, 157, 14, 161, 194, 15, 33, 79, 5, 55, 187, 59, 123, 218, 174, 32, 164, 92, 80, 85, 156, 230, 26, 140, 139]));
     });
 
-    test('length > 64', () => {
+    test('should return the hash of the given data in Uint8Array format (length > 64)', () => {
         const fileBuffer = Buffer.from('testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
@@ -181,7 +181,7 @@ describe('digest', () => {
         );
     });
 
-    test('already finished', () => {
+    test('should return the hash of the given data in Uint8Array format (already finished)', () => {
         const fileBuffer = Buffer.from('test');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
@@ -193,8 +193,8 @@ describe('digest', () => {
     });
 });
 
-describe('hex digest', () => {
-    test('default', () => {
+describe('hex digest method', () => {
+    test('should return the hash of the given data in hex format', () => {
         const fileBuffer = Buffer.from('testtesttesttesttesttesttesttest');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');
@@ -204,7 +204,7 @@ describe('hex digest', () => {
         expect(hexhHash).toBe('ce5bfb09971f4ee49d0ea1c20f214f0537bb3b7bdaae20a45c50559ce61a8c8b');
     });
 
-    test('length < 64', () => {
+    test('should return the hash of the given data in hex format (length < 64)', () => {
         const fileBuffer = Buffer.from('testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest');
         let publicKey = 'publicKey';
         publicKey = publicKey.padEnd(32, ' ');

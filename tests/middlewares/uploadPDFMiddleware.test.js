@@ -1,24 +1,23 @@
 const { destination, filename } = require('../../middlewares/uploadPDFMiddleware');
 
-describe('destination', () => {
-    test('success', () => {
-        const req = {};
-        const file = {
-            mimetype: 'application/pdf'
-        };
-        const cb = jest.fn();
+let req, cb;
+
+beforeAll(() => {
+    req = {};
+    cb = jest.fn();
+});
+
+describe('destination function', () => {
+    test('should upload the file to uploads folder', () => {
+        const file = { mimetype: 'application/pdf' };
 
         destination(req, file, cb);
 
         expect(cb).toHaveBeenCalledWith(null, 'uploads');
     });
 
-    test('error', () => {
-        const req = {};
-        const file = {
-            mimetype: 'image/png'
-        };
-        const cb = jest.fn();
+    test('should throw an error if the file is not a PDF', () => {
+        const file = { mimetype: 'image/png' };
 
         destination(req, file, cb);
 
@@ -26,14 +25,10 @@ describe('destination', () => {
     });
 });
 
-test('filename', () => {
+test('filename function should return the filename with the given format (timestamp-originalname)', () => {
     jest.spyOn(Date, 'now').mockReturnValue(123456789);
 
-    const req = {};
-    const file = {
-        originalname: 'test.pdf'
-    };
-    const cb = jest.fn();
+    const file = { originalname: 'test.pdf' };
 
     filename(req, file, cb);
 

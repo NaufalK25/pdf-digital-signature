@@ -16,18 +16,18 @@ afterAll(() => {
     jest.restoreAllMocks();
 });
 
-test('constructor', () => {
+test('constructor method should create new PDF instance', () => {
     const pdf = new PDF(pdfName);
     expect(pdf.filePath).toBe(pdfName);
 });
 
-test('hash', () => {
+test('hash method should hash the given pdf', () => {
     const hash = new PDF(testPDF).hash(publicKey);
 
     expect(hash).toBe(expectedHash);
 });
 
-test('decrypt', async () => {
+test('decrypt method should decrypt the given pdf hash', async () => {
     jest.spyOn(UploadedPDF, 'getChecksumByPDFName').mockResolvedValue(expectedHash);
     jest.spyOn(AES.prototype, 'decrypt').mockReturnValue(expectedHash);
 
@@ -37,7 +37,7 @@ test('decrypt', async () => {
     expect(decryptedHash).toBe(expectedHash);
 });
 
-test('sign', () => {
+test('sign method should sign the given pdf', async () => {
     jest.spyOn(UploadedPDF, 'updateByPDFName').mockResolvedValue([1]);
 
     const req = mockRequest({ user: { id: 1 } });
