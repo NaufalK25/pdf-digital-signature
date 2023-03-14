@@ -1,64 +1,63 @@
-const isByteArray = arr => {
-    return arr instanceof Uint8Array || Array.isArray(arr);
-};
+/*!
+ * Library Name: BLAKE2s JavaScript
+ * Author: Dmitry Chestnykh
+ * Version: 1.3.0
+ * License: Public domain
+ * Repository: https://github.com/dchest/blake2s-js
+ */
 
-const validateConfigKeys = config => {
-    for (const key in config) {
-        switch (key) {
-            case 'key':
-            case 'personalization':
-            case 'salt':
-                if (!isByteArray(config[key])) {
-                    throw new TypeError(`${key} must be a Uint8Array or an Array of bytes`);
-                }
-                break;
-            default:
-                throw new Error(`unexpected key in config: ${key}`);
+var BLAKE2s = (function () {
+    var MAX_DIGEST_LENGTH = 32;
+    var BLOCK_LENGTH = 64;
+    var MAX_KEY_LENGTH = 32;
+    var PERSONALIZATION_LENGTH = 8;
+    var SALT_LENGTH = 8;
+
+    var IV = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
+
+    function isByteArray(a) {
+        var kind = Object.prototype.toString.call(a);
+        return kind === '[object Uint8Array]' || kind === '[object Array]';
+    }
+
+    function checkConfig(config) {
+        for (var key in config) {
+            switch (key) {
+                case 'key':
+                case 'personalization':
+                case 'salt':
+                    if (!isByteArray(config[key])) {
+                        throw new TypeError(key + ' must be a Uint8Array or an Array of bytes');
+                    }
+                    break;
+                default:
+                    throw new Error('unexpected key in config: ' + key);
+            }
         }
     }
-};
 
-const bytesToInt32 = (arr, idx) => {
-    return (arr[idx + 0] & 0xff) | ((arr[idx + 1] & 0xff) << 8) | ((arr[idx + 2] & 0xff) << 16) | ((arr[idx + 3] & 0xff) << 24);
-};
+    function load32(a, i) {
+        return (a[i + 0] & 0xff) | ((a[i + 1] & 0xff) << 8) | ((a[i + 2] & 0xff) << 16) | ((a[i + 3] & 0xff) << 24);
+    }
 
-class BLAKE2s {
-    static MAX_DIGEST_LENGTH = 32;
-    static BLOCK_LENGTH = 64;
-    static MAX_KEY_LENGTH = 32;
-    static PERSONALIZATION_LENGTH = 8;
-    static SALT_LENGTH = 8;
+    function BLAKE2s(digestLength, keyOrConfig) {
+        if (typeof digestLength === 'undefined') digestLength = MAX_DIGEST_LENGTH;
 
-    static digestLength = BLAKE2s.MAX_DIGEST_LENGTH;
-    static blockLength = BLAKE2s.BLOCK_LENGTH;
-    static keyLength = BLAKE2s.MAX_KEY_LENGTH;
-    static personalizationLength = BLAKE2s.PERSONALIZATION_LENGTH;
-    static saltLength = BLAKE2s.SALT_LENGTH;
-
-    static IV = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
-
-    constructor(digestLength, keyOrConfig) {
-        if (digestLength === undefined) {
-            digestLength = BLAKE2s.MAX_DIGEST_LENGTH;
-        }
-
-        if (digestLength <= 0 || digestLength > BLAKE2s.MAX_DIGEST_LENGTH) {
-            throw new Error('bad digestLength');
-        }
+        if (digestLength <= 0 || digestLength > MAX_DIGEST_LENGTH) throw new Error('bad digestLength');
 
         this.digestLength = digestLength;
 
-        let key, personalization, salt;
-        let keyLength = 0;
+        var key, personalization, salt;
+        var keyLength = 0;
 
         if (isByteArray(keyOrConfig)) {
             key = keyOrConfig;
             keyLength = key.length;
         } else if (typeof keyOrConfig === 'object') {
-            validateConfigKeys(keyOrConfig);
+            checkConfig(keyOrConfig);
 
             key = keyOrConfig.key;
-            keyLength = key?.length || 0;
+            keyLength = key ? key.length : 0;
 
             salt = keyOrConfig.salt;
             personalization = keyOrConfig.personalization;
@@ -66,83 +65,75 @@ class BLAKE2s {
             throw new Error('unexpected key or config type');
         }
 
-        if (keyLength > BLAKE2s.MAX_KEY_LENGTH) {
-            throw new Error('key is too long');
-        }
-
-        if (salt && salt.length !== BLAKE2s.SALT_LENGTH) {
-            throw new Error(`salt must be ${BLAKE2s.SALT_LENGTH} bytes`);
-        }
-
-        if (personalization && personalization.length !== BLAKE2s.PERSONALIZATION_LENGTH) {
-            throw new Error(`personalization must be ${BLAKE2s.PERSONALIZATION_LENGTH} bytes`);
-        }
+        if (keyLength > MAX_KEY_LENGTH) throw new Error('key is too long');
+        if (salt && salt.length !== SALT_LENGTH) throw new Error('salt must be ' + SALT_LENGTH + ' bytes');
+        if (personalization && personalization.length !== PERSONALIZATION_LENGTH) throw new Error('personalization must be ' + PERSONALIZATION_LENGTH + ' bytes');
 
         this.isFinished = false;
 
-        this.hashStates = new Uint32Array(BLAKE2s.IV);
+        // Hash state.
+        this.h = new Uint32Array(IV);
 
-        const param = new Uint8Array([digestLength & 0xff, keyLength, 1, 1]);
-        this.hashStates[0] ^= bytesToInt32(param, 0);
+        // XOR parts of parameter block into initial state.
+        var param = new Uint8Array([digestLength & 0xff, keyLength, 1, 1]);
+        this.h[0] ^= load32(param, 0);
 
         if (salt) {
-            this.hashStates[4] ^= bytesToInt32(salt, 0);
-            this.hashStates[5] ^= bytesToInt32(salt, 4);
+            this.h[4] ^= load32(salt, 0);
+            this.h[5] ^= load32(salt, 4);
         }
 
         if (personalization) {
-            this.hashStates[6] ^= bytesToInt32(personalization, 0);
-            this.hashStates[7] ^= bytesToInt32(personalization, 4);
+            this.h[6] ^= load32(personalization, 0);
+            this.h[7] ^= load32(personalization, 4);
         }
 
-        this.bufferFromData = new Uint8Array(BLAKE2s.BLOCK_LENGTH);
-        this.numberOfBufferBytes = 0;
+        // Buffer for data.
+        this.x = new Uint8Array(BLOCK_LENGTH);
+        this.nx = 0;
 
-        this.trackCounter0 = 0;
-        this.trackCounter1 = 0;
+        // Byte counter.
+        this.t0 = 0;
+        this.t1 = 0;
 
-        this.flag0 = 0;
-        this.flag1 = 0;
+        // Flags.
+        this.f0 = 0;
+        this.f1 = 0;
 
+        // Fill buffer with key, if present.
         if (keyLength > 0) {
-            for (let i = 0; i < keyLength; i++) {
-                this.bufferFromData[i] = key[i];
-            }
-
-            for (let i = keyLength; i < BLAKE2s.BLOCK_LENGTH; i++) {
-                this.bufferFromData[i] = 0;
-            }
-
-            this.numberOfBufferBytes = BLAKE2s.BLOCK_LENGTH;
+            for (var i = 0; i < keyLength; i++) this.x[i] = key[i];
+            for (i = keyLength; i < BLOCK_LENGTH; i++) this.x[i] = 0;
+            this.nx = BLOCK_LENGTH;
         }
     }
 
-    processBlock(length) {
-        this.trackCounter0 += length;
-        if (this.trackCounter0 != this.trackCounter0 >>> 0) {
-            this.trackCounter0 = 0;
-            this.trackCounter1++;
+    BLAKE2s.prototype.processBlock = function (length) {
+        this.t0 += length;
+        if (this.t0 != this.t0 >>> 0) {
+            this.t0 = 0;
+            this.t1++;
         }
 
-        let v0 = this.hashStates[0],
-            v1 = this.hashStates[1],
-            v2 = this.hashStates[2],
-            v3 = this.hashStates[3],
-            v4 = this.hashStates[4],
-            v5 = this.hashStates[5],
-            v6 = this.hashStates[6],
-            v7 = this.hashStates[7],
-            v8 = BLAKE2s.IV[0],
-            v9 = BLAKE2s.IV[1],
-            v10 = BLAKE2s.IV[2],
-            v11 = BLAKE2s.IV[3],
-            v12 = BLAKE2s.IV[4] ^ this.trackCounter0,
-            v13 = BLAKE2s.IV[5] ^ this.trackCounter1,
-            v14 = BLAKE2s.IV[6] ^ this.flag0,
-            v15 = BLAKE2s.IV[7] ^ this.flag1;
+        var v0 = this.h[0],
+            v1 = this.h[1],
+            v2 = this.h[2],
+            v3 = this.h[3],
+            v4 = this.h[4],
+            v5 = this.h[5],
+            v6 = this.h[6],
+            v7 = this.h[7],
+            v8 = IV[0],
+            v9 = IV[1],
+            v10 = IV[2],
+            v11 = IV[3],
+            v12 = IV[4] ^ this.t0,
+            v13 = IV[5] ^ this.t1,
+            v14 = IV[6] ^ this.f0,
+            v15 = IV[7] ^ this.f1;
 
-        const x = this.bufferFromData;
-        const m0 = (x[0] & 0xff) | ((x[1] & 0xff) << 8) | ((x[2] & 0xff) << 16) | ((x[3] & 0xff) << 24),
+        var x = this.x;
+        var m0 = (x[0] & 0xff) | ((x[1] & 0xff) << 8) | ((x[2] & 0xff) << 16) | ((x[3] & 0xff) << 24),
             m1 = (x[4] & 0xff) | ((x[5] & 0xff) << 8) | ((x[6] & 0xff) << 16) | ((x[7] & 0xff) << 24),
             m2 = (x[8] & 0xff) | ((x[9] & 0xff) << 8) | ((x[10] & 0xff) << 16) | ((x[11] & 0xff) << 24),
             m3 = (x[12] & 0xff) | ((x[13] & 0xff) << 8) | ((x[14] & 0xff) << 16) | ((x[15] & 0xff) << 24),
@@ -1299,101 +1290,107 @@ class BLAKE2s {
         v5 ^= v10;
         v5 = (v5 << (32 - 7)) | (v5 >>> 7);
 
-        this.hashStates[0] ^= v0 ^ v8;
-        this.hashStates[1] ^= v1 ^ v9;
-        this.hashStates[2] ^= v2 ^ v10;
-        this.hashStates[3] ^= v3 ^ v11;
-        this.hashStates[4] ^= v4 ^ v12;
-        this.hashStates[5] ^= v5 ^ v13;
-        this.hashStates[6] ^= v6 ^ v14;
-        this.hashStates[7] ^= v7 ^ v15;
-    }
+        this.h[0] ^= v0 ^ v8;
+        this.h[1] ^= v1 ^ v9;
+        this.h[2] ^= v2 ^ v10;
+        this.h[3] ^= v3 ^ v11;
+        this.h[4] ^= v4 ^ v12;
+        this.h[5] ^= v5 ^ v13;
+        this.h[6] ^= v6 ^ v14;
+        this.h[7] ^= v7 ^ v15;
+    };
 
-    update(p, offset = 0, length = p.length - offset) {
-        if (typeof p === 'string') {
-            throw new TypeError('update() accepts Uint8Array or an Array of bytes');
+    BLAKE2s.prototype.update = function (p, offset, length) {
+        if (typeof p === 'string') throw new TypeError('update() accepts Uint8Array or an Array of bytes');
+        if (this.isFinished) throw new Error('update() after calling digest()');
+
+        if (typeof offset === 'undefined') {
+            offset = 0;
+        }
+        if (typeof length === 'undefined') {
+            length = p.length - offset;
         }
 
-        if (this.isFinished) {
-            throw new Error('update() after calling digest()');
-        }
+        if (length === 0) return this;
 
-        if (length === 0) {
-            return this;
-        }
+        var i,
+            left = 64 - this.nx;
 
-        let i;
-        const left = 64 - this.numberOfBufferBytes;
-
+        // Finish buffer.
         if (length > left) {
             for (i = 0; i < left; i++) {
-                this.bufferFromData[this.numberOfBufferBytes + i] = p[offset + i];
+                this.x[this.nx + i] = p[offset + i];
             }
             this.processBlock(64);
             offset += left;
             length -= left;
-            this.numberOfBufferBytes = 0;
+            this.nx = 0;
         }
 
+        // Process message blocks.
         while (length > 64) {
             for (i = 0; i < 64; i++) {
-                this.bufferFromData[i] = p[offset + i];
+                this.x[i] = p[offset + i];
             }
-
             this.processBlock(64);
             offset += 64;
             length -= 64;
-            this.numberOfBufferBytes = 0;
+            this.nx = 0;
         }
 
+        // Copy leftovers to buffer.
         for (i = 0; i < length; i++) {
-            this.bufferFromData[this.numberOfBufferBytes + i] = p[offset + i];
+            this.x[this.nx + i] = p[offset + i];
         }
-
-        this.numberOfBufferBytes += length;
+        this.nx += length;
 
         return this;
-    }
+    };
 
-    digest() {
-        let i;
+    BLAKE2s.prototype.digest = function () {
+        var i;
 
-        if (this.isFinished) {
-            return this.result;
-        }
+        if (this.isFinished) return this.result;
 
-        for (i = this.numberOfBufferBytes; i < 64; i++) {
-            this.bufferFromData[i] = 0;
-        }
+        for (i = this.nx; i < 64; i++) this.x[i] = 0;
 
-        this.flag0 = 0xffffffff;
+        // Set last block flag.
+        this.f0 = 0xffffffff;
 
-        this.processBlock(this.numberOfBufferBytes);
+        //TODO in tree mode, set f1 to 0xffffffff.
+        this.processBlock(this.nx);
 
-        let digest = new Uint8Array(32);
+        var d = new Uint8Array(32);
         for (i = 0; i < 8; i++) {
-            const hashState = this.hashStates[i];
-            digest[i * 4 + 0] = (hashState >>> 0) & 0xff;
-            digest[i * 4 + 1] = (hashState >>> 8) & 0xff;
-            digest[i * 4 + 2] = (hashState >>> 16) & 0xff;
-            digest[i * 4 + 3] = (hashState >>> 24) & 0xff;
+            var h = this.h[i];
+            d[i * 4 + 0] = (h >>> 0) & 0xff;
+            d[i * 4 + 1] = (h >>> 8) & 0xff;
+            d[i * 4 + 2] = (h >>> 16) & 0xff;
+            d[i * 4 + 3] = (h >>> 24) & 0xff;
         }
-
-        this.result = new Uint8Array(digest.subarray(0, this.digestLength));
+        this.result = new Uint8Array(d.subarray(0, this.digestLength));
         this.isFinished = true;
         return this.result;
-    }
+    };
 
-    hexDigest() {
-        const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
-        const out = [];
-        const digest = this.digest();
-        for (let i = 0; i < digest.length; i++) {
-            out.push(hex[(digest[i] >> 4) & 0xf]);
-            out.push(hex[digest[i] & 0xf]);
+    BLAKE2s.prototype.hexDigest = function () {
+        var hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+        var out = [];
+        var d = this.digest();
+        for (var i = 0; i < d.length; i++) {
+            out.push(hex[(d[i] >> 4) & 0xf]);
+            out.push(hex[d[i] & 0xf]);
         }
         return out.join('');
-    }
-}
+    };
 
-module.exports = BLAKE2s;
+    BLAKE2s.digestLength = MAX_DIGEST_LENGTH;
+    BLAKE2s.blockLength = BLOCK_LENGTH;
+    BLAKE2s.keyLength = MAX_KEY_LENGTH;
+    BLAKE2s.saltLength = SALT_LENGTH;
+    BLAKE2s.personalizationLength = PERSONALIZATION_LENGTH;
+
+    return BLAKE2s;
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = BLAKE2s;

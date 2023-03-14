@@ -39,7 +39,7 @@
         <tbody>
             <% pdfs.forEach((pdf, idx) => { %>
             <tr>
-                <td>
+                <td class="pdf" data-pdf-name="<%= pdf.name %>" data-pdf-public-key="<%= pdf.publicKey %>">
                     <a href="<%= pdf.url %>" target="_blank" rel="noopener noreferrer" title="<%= pdf.name %>"><%= pdf.name %></a>
                     <% if (pdf.isHashed) { %>
                     <div>
@@ -168,7 +168,7 @@
         <div class="d-flex justify-content-center">
             <div>
                 <label for="public_key">Public Key</label>
-                <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
+                <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required disabled>
                 <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
             </div>
         </div>
