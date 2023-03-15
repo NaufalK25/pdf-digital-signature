@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const PDF = require('../../utils/PDF');
-const { compareHashPDF, deleteAllPDF, deletePDF, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
+const { compareHashPDF, deleteAllPDF, deletePDF, getAbout, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
 const { UploadedPDF, User } = require('../../database/models');
 
 const mockRequest = ({ user, file, files, body } = {}) => ({
@@ -95,6 +95,23 @@ describe('getRoot controller', () => {
                 message: req.flash('message') || ''
             }
         });
+    });
+});
+
+test('getAbout controller should render the about page', () => {
+    const req = mockRequest();
+    const res = mockResponse();
+
+    getAbout(req, res);
+
+    expect(res.render).toHaveBeenCalledWith('about', {
+        title: 'About | PDF Digital Signature',
+        activeNav: 'about',
+        loggedInUser: req.user || null,
+        flash: {
+            type: req.flash('type') || '',
+            message: req.flash('message') || ''
+        }
     });
 });
 

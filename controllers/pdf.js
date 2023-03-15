@@ -23,6 +23,18 @@ const getRoot = async (req, res) => {
     });
 };
 
+const getAbout = (req, res) => {
+    res.render('about', {
+        title: 'About | PDF Digital Signature',
+        activeNav: 'about',
+        loggedInUser: req.user || null,
+        flash: {
+            type: req.flash('type') || '',
+            message: req.flash('message') || ''
+        }
+    });
+};
+
 const signPDF = async (req, res) => {
     const publicKey = req.body.public_key;
     const pdf = req.body.signed_pdf;
@@ -139,6 +151,7 @@ const deleteAllPDF = async (req, res) => {
 
 module.exports = {
     getRoot,
+    getAbout,
     signPDF,
     compareHashPDF,
     uploadPDF,

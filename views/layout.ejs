@@ -18,29 +18,33 @@
         <p>PDF Digital Signature</p>
         <div class="nav-icons">
             <a href="/" class="nav-icon <%= activeNav === 'home' ? 'nav-active' : '' %>" title="Home">
-                <%- include('../public/svg/home.svg') %>
+                Home
+            </a>
+
+            <a href="/about" class="nav-icon <%= activeNav === 'about' ? 'nav-active' : '' %>" title="About">
+                About
             </a>
 
             <% if (!loggedInUser) { %>
             <a href="/register" class="nav-icon <%= activeNav === 'register' ? 'nav-active' : '' %>" title="Register">
-                <%- include('../public/svg/register.svg') %>
+                Register
             </a>
 
             <a href="/login" class="nav-icon <%= activeNav === 'login' ? 'nav-active' : '' %>" title="Login">
-                <%- include('../public/svg/login.svg') %>
+                Login
             </a>
             <% } %>
 
             <% if (loggedInUser) { %>
             <form action="/logout" method="POST">
                 <button type="submit" class="nav-icon" title="Logout">
-                    <%- include('../public/svg/logout.svg') %>
+                    Logout
                 </button>
             </form>
             <% } %>
 
             <a href="https://github.com/NaufalK25/pdf-digital-signature" target="_blank" rel="noopener noreferrer" class="nav-icon" title="NaufalK25/pdf-digital-signature">
-                <%- include('../public/svg/github.svg') %>
+                <%- include('../public/github.svg') %>
             </a>
         </div>
     </nav>

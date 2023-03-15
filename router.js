@@ -1,7 +1,7 @@
 const express = require('express');
 const { alreadyLoggedIn, notLoggedIn } = require('./middlewares/authMiddleware');
 const { getLogin, getRegister, postLogin, postLogout, postRegister } = require('./controllers/auth');
-const { compareHashPDF, deleteAllPDF, deletePDF, getRoot, signPDF, uploadPDF } = require('./controllers/pdf');
+const { compareHashPDF, deleteAllPDF, deletePDF, getAbout, getRoot, signPDF, uploadPDF } = require('./controllers/pdf');
 const { uploadPDFMiddleware } = require('./middlewares/uploadPDFMiddleware');
 const { loginValidator, publicKeyValidator, registerValidator } = require('./middlewares/validatorMiddleware');
 
@@ -20,6 +20,7 @@ router.delete('/delete', deletePDF);
 router.delete('/delete-all', deleteAllPDF);
 router.post('/sign', publicKeyValidator, signPDF);
 router.post('/compare-hash', uploadPDFMiddleware.single('normal_pdf'), publicKeyValidator, compareHashPDF);
+router.get('/about', getAbout);
 router.get('/', getRoot);
 
 router.get('*', (req, res) => {
