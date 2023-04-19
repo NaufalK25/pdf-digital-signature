@@ -1,27 +1,28 @@
 const express = require('express');
+const AuthController = require('./controllers/auth');
+const PDFController = require('./controllers/pdf');
 const { alreadyLoggedIn, notLoggedIn } = require('./middlewares/authMiddleware');
-const { getLogin, getRegister, postLogin, postLogout, postRegister } = require('./controllers/auth');
-const { compareHashPDF, deleteAllPDF, deletePDF, getAbout, getRoot, signPDF, uploadPDF } = require('./controllers/pdf');
 const { uploadPDFMiddleware } = require('./middlewares/uploadPDFMiddleware');
 const { loginValidator, publicKeyValidator, registerValidator } = require('./middlewares/validatorMiddleware');
 
 const router = express.Router();
+const authController = new AuthController();
+const pdfController = new PDFController();
 
 // Auth
-router.get('/register', alreadyLoggedIn, getRegister);
-router.get('/login', alreadyLoggedIn, getLogin);
-router.post('/register', registerValidator, postRegister);
-router.post('/login', loginValidator, postLogin);
-router.post('/logout', notLoggedIn, postLogout);
+router.get('/register', alreadyLoggedIn, authController.getRegister);
+router.get('/login', alreadyLoggedIn, authController.getLogin);
+router.post('/register', registerValidator, authController.postRegister);
+router.post('/login', loginValidator, authController.postLogin);
+router.post('/logout', notLoggedIn, authController.postLogout);
 
 // PDF
-router.post('/uploads', uploadPDFMiddleware.array('files'), uploadPDF);
-router.delete('/delete', deletePDF);
-router.delete('/delete-all', deleteAllPDF);
-router.post('/sign', publicKeyValidator, signPDF);
-router.post('/compare-hash', uploadPDFMiddleware.single('normal_pdf'), publicKeyValidator, compareHashPDF);
-router.get('/about', getAbout);
-router.get('/', getRoot);
+router.post('/uploads', uploadPDFMiddleware.array('files'), pdfController.uploadPDF);
+router.delete('/delete', pdfController.deletePDF);
+router.delete('/delete-all', pdfController.deleteAllPDF);
+router.post('/sign', publicKeyValidator, pdfController.signPDF);
+router.post('/compare-hash', uploadPDFMiddleware.single('normal_pdf'), publicKeyValidator, pdfController.compareHashPDF);
+router.get('/', pdfController.getRoot);
 
 router.get('*', (req, res) => {
     res.redirect('/');

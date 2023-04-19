@@ -16,7 +16,7 @@
 
 <% if (loggedInUser) { %>
 <form action="/delete-all?_method=DELETE" method="POST">
-    <button type="submit" class="btn btn-outline-danger" title="Delete All" <%= !pdfs.length > 0 && 'disabled'  %>>
+    <button type="submit" class="btn btn-outline-danger" title="Delete All" <%= !pdfs.length > 0 && 'disabled' %>>
         <span>Delete All</span>
     </button>
 </form>
@@ -168,7 +168,7 @@
         <div class="d-flex justify-content-center">
             <div>
                 <label for="public_key">Public Key</label>
-                <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" required disabled>
+                <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" value="" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 ? 'disabled' : 'readonly' %>>
                 <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
             </div>
         </div>

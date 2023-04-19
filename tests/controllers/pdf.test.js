@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const PDF = require('../../utils/PDF');
-const { compareHashPDF, deleteAllPDF, deletePDF, getAbout, getRoot, signPDF, uploadPDF } = require('../../controllers/pdf');
+const PDFController = require('../../controllers/pdf');
 const { UploadedPDF, User } = require('../../database/models');
 
+const pdfController = new PDFController();
 const mockRequest = ({ user, file, files, body } = {}) => ({
     flash: jest.fn(),
     user,
@@ -50,7 +51,7 @@ describe('getRoot controller', () => {
         });
         const res = mockResponse();
 
-        await getRoot(req, res);
+        await pdfController.getRoot(req, res);
 
         expect(res.render).toHaveBeenCalledWith('index', {
             title: 'PDF Digital Signature',
@@ -83,7 +84,7 @@ describe('getRoot controller', () => {
         const req = mockRequest({ user: null });
         const res = mockResponse();
 
-        getRoot(req, res);
+        pdfController.getRoot(req, res);
 
         expect(res.render).toHaveBeenCalledWith('index', {
             title: 'PDF Digital Signature',
@@ -95,23 +96,6 @@ describe('getRoot controller', () => {
                 message: req.flash('message') || ''
             }
         });
-    });
-});
-
-test('getAbout controller should render the about page', () => {
-    const req = mockRequest();
-    const res = mockResponse();
-
-    getAbout(req, res);
-
-    expect(res.render).toHaveBeenCalledWith('about', {
-        title: 'About | PDF Digital Signature',
-        activeNav: 'about',
-        loggedInUser: req.user || null,
-        flash: {
-            type: req.flash('type') || '',
-            message: req.flash('message') || ''
-        }
     });
 });
 
@@ -145,7 +129,7 @@ describe('signPDF controller', () => {
         });
         const res = mockResponse();
 
-        await signPDF(req, res);
+        await pdfController.signPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
         expect(req.flash).toHaveBeenCalledWith('message', 'File test.pdf has been signed');
@@ -163,7 +147,7 @@ describe('signPDF controller', () => {
         });
         const res = mockResponse();
 
-        signPDF(req, res);
+        pdfController.signPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Please enter a public key');
@@ -179,7 +163,7 @@ describe('signPDF controller', () => {
         });
         const res = mockResponse();
 
-        signPDF(req, res);
+        pdfController.signPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Public Key must be 1-32 characters long');
@@ -223,7 +207,7 @@ describe('compareHashPDF controller', () => {
         });
         const res = mockResponse();
 
-        await compareHashPDF(req, res);
+        await pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
         expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf and test.pdf are the same file');
@@ -251,7 +235,7 @@ describe('compareHashPDF controller', () => {
         });
         const res = mockResponse();
 
-        await compareHashPDF(req, res);
+        await pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf and test.pdf are not the same file');
@@ -273,7 +257,7 @@ describe('compareHashPDF controller', () => {
         });
         const res = mockResponse();
 
-        compareHashPDF(req, res);
+        pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Please select a hashed PDF file');
@@ -294,7 +278,7 @@ describe('compareHashPDF controller', () => {
         });
         const res = mockResponse();
 
-        compareHashPDF(req, res);
+        pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Please upload a normal PDF file');
@@ -318,7 +302,7 @@ describe('compareHashPDF controller', () => {
         });
         const res = mockResponse();
 
-        compareHashPDF(req, res);
+        pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Please enter a public key');
@@ -343,7 +327,7 @@ describe('compareHashPDF controller', () => {
         });
         const res = mockResponse();
 
-        compareHashPDF(req, res);
+        pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Public Key must be 1-32 characters long');
@@ -366,7 +350,7 @@ describe('uploadPDF controller', () => {
         });
         const res = mockResponse();
 
-        await uploadPDF(req, res);
+        await pdfController.uploadPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
         expect(req.flash).toHaveBeenCalledWith('message', 'Successfully uploaded 2 file(s)');
@@ -377,7 +361,7 @@ describe('uploadPDF controller', () => {
         const req = mockRequest({ files: [] });
         const res = mockResponse();
 
-        uploadPDF(req, res);
+        pdfController.uploadPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Please select one or more files to upload');
@@ -396,7 +380,7 @@ describe('deletePDF controller', () => {
         });
         const res = mockResponse();
 
-        await deletePDF(req, res);
+        await pdfController.deletePDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
         expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted test.pdf');
@@ -416,7 +400,7 @@ describe('deleteAllPDF controller', () => {
         const req = mockRequest({ user: { id: 1 } });
         const res = mockResponse();
 
-        await deleteAllPDF(req, res);
+        await pdfController.deleteAllPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
         expect(req.flash).toHaveBeenCalledWith('message', 'Successfully deleted 2 file(s)');
