@@ -2,7 +2,7 @@ const multer = require('multer');
 
 const destination = (req, file, cb) => {
     if (file.mimetype !== 'application/pdf') {
-        return cb(new Error('Only PDF files are allowed!'));
+        return cb(new Error('Hanya file PDF yang diperbolehkan'));
     }
     cb(null, 'uploads');
 };

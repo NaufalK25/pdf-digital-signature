@@ -34,7 +34,7 @@ describe('encrypt method', () => {
         const aes = new AES('test');
         expect(() => {
             aes.encrypt('testtesttest');
-        }).toThrowError('Plaintext must be a multiple of 16 characters');
+        }).toThrowError('Plaintext harus merupakan kelipatan dari 16 karakter');
     });
 });
 
@@ -51,6 +51,6 @@ describe('decrypt method', () => {
         const encrypted = aes.encrypt('testtesttesttest');
         expect(() => {
             aes.decrypt(encrypted.slice(0, 12));
-        }).toThrowError('Ciphertext must be a multiple of 16 characters');
+        }).toThrowError('Ciphertext harus merupakan kelipatan dari 16 karakter');
     });
 });

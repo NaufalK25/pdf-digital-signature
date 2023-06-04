@@ -21,7 +21,7 @@ describe('destination function', () => {
 
         destination(req, file, cb);
 
-        expect(cb).toHaveBeenCalledWith(new Error('Only PDF files are allowed!'));
+        expect(cb).toHaveBeenCalledWith(new Error('Hanya file PDF yang diperbolehkan'));
     });
 });
 

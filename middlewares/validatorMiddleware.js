@@ -5,43 +5,55 @@ const registerValidator = [
     body('username')
         .trim()
         .notEmpty()
-        .withMessage('Username is required')
+        .withMessage('Username tidak boleh kosong')
         .isString()
-        .withMessage('Username must be a string')
+        .withMessage('Username harurs berupa string')
         .custom(async value => {
             const user = await User.findByUsername(value);
             if (user) {
-                throw new Error('Username already exists');
+                throw new Error('Username sudah digunakan');
             }
         }),
-    body('password').notEmpty().withMessage('Password is required').isString().withMessage('Password must be a string').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('confirmPassword').notEmpty().withMessage('Confirm password is required').isString().withMessage('Confirm password must be a string')
+    body('password')
+        .notEmpty()
+        .withMessage('Password tidak boleh kosong')
+        .isString()
+        .withMessage('Password harus berurpa string')
+        .isLength({ min: 6 })
+        .withMessage('Password minimal memiliki 6 karakter'),
+    body('confirmPassword').notEmpty().withMessage('Konfirmasi password tidak boleh kosong').isString().withMessage('Konfirmasi password harus berurpa string')
 ];
 
 const loginValidator = [
     body('username')
         .trim()
         .notEmpty()
-        .withMessage('Username is required')
+        .withMessage('Username tidak boleh kosong')
         .isString()
-        .withMessage('Username must be a string')
+        .withMessage('Username harus berupa string')
         .custom(async value => {
             const user = await User.findByUsername(value);
             if (!user) {
-                throw new Error('Username or password is incorrect');
+                throw new Error('Username atau password salah');
             }
         }),
-    body('password').notEmpty().withMessage('Password is required').isString().withMessage('Password must be a string').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+    body('password')
+        .notEmpty()
+        .withMessage('Password tidak boleh kosong')
+        .isString()
+        .withMessage('Password harus berupa string')
+        .isLength({ min: 6 })
+        .withMessage('Password minimal memiliki 6 karakter')
 ];
 
 const publicKeyValidator = [
     body('public_key')
         .notEmpty()
-        .withMessage('Public key is required')
+        .withMessage('Kunci publik tidak boleh kosong')
         .isString()
-        .withMessage('Public key must be a string')
+        .withMessage('Kunci publik harus berupa string')
         .isLength({ min: 1, max: 32 })
-        .withMessage('Public key must be 1-32 characters long')
+        .withMessage('Panjang kunci publik harus 1-32 karakter')
 ];
 
 module.exports = {

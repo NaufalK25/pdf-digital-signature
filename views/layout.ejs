@@ -18,30 +18,30 @@
         <p>PDF Digital Signature</p>
         <div class="nav-icons">
             <a href="/" class="nav-icon <%= activeNav === 'home' ? 'nav-active' : '' %>" title="Home">
-                Home
+                Beranda
             </a>
 
             <% if (!loggedInUser) { %>
             <a href="/register" class="nav-icon <%= activeNav === 'register' ? 'nav-active' : '' %>" title="Register">
-                Register
+                Daftar
             </a>
 
             <a href="/login" class="nav-icon <%= activeNav === 'login' ? 'nav-active' : '' %>" title="Login">
-                Login
+                Masuk
             </a>
             <% } %>
 
             <% if (loggedInUser) { %>
             <form action="/logout" method="POST">
                 <button type="submit" class="nav-icon" title="Logout">
-                    Logout
+                    Keluar
                 </button>
             </form>
             <% } %>
 
-            <a href="https://github.com/NaufalK25/pdf-digital-signature" target="_blank" rel="noopener noreferrer" class="nav-icon" title="NaufalK25/pdf-digital-signature">
+            <!-- <a href="https://github.com/NaufalK25/pdf-digital-signature" target="_blank" rel="noopener noreferrer" class="nav-icon" title="NaufalK25/pdf-digital-signature">
                 <%- include('../public/github.svg') %>
-            </a>
+            </a> -->
         </div>
     </nav>
 

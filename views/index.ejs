@@ -5,10 +5,10 @@
 
             <% if (loggedInUser) { %>
             <button class="btn btn-primary" type="submit" id="uploadFileAddon" title="Upload">
-                <span>Upload</span>
+                <span>Unggah</span>
             </button>
             <% } else { %>
-            <a href="/login" class="btn btn-primary" id="uploadFileAddon" title="Upload">Upload</a>
+            <a href="/login" class="btn btn-primary" id="uploadFileAddon" title="Upload">Unggah</a>
             <% } %>
         </div>
     </form>
@@ -17,12 +17,12 @@
 <% if (loggedInUser) { %>
 <form action="/delete-all?_method=DELETE" method="POST">
     <button type="submit" class="btn btn-outline-danger" title="Delete All" <%= !pdfs.length > 0 && 'disabled' %>>
-        <span>Delete All</span>
+        <span>Hapus Semua</span>
     </button>
 </form>
 <% } else { %>
 <div class="text-center">
-    <a href="/login" class="btn btn-outline-danger" title="Delete All">Delete All</a>
+    <a href="/login" class="btn btn-outline-danger" title="Delete All">Hapus Semua</a>
 </div>
 <% } %>
 
@@ -31,8 +31,8 @@
     <table class="table table-responsive align-middle">
         <thead>
             <tr>
-                <th class="text-center">Name</th>
-                <th colspan="3" class="text-center">Action</th>
+                <th class="text-center">Nama</th>
+                <th colspan="3" class="text-center">Aksi</th>
             </tr>
         </thead>
 
@@ -46,7 +46,7 @@
                         <span class="text-small">Checksum: <%= pdf.checksum || '-' %></span>
                     </div>
                     <div>
-                        <span class="text-small">Public Key: <%= pdf.publicKey || '-' %></span>
+                        <span class="text-small">Kunci Publik: <%= pdf.publicKey || '-' %></span>
                     </div>
                     <% } %>
                 </td>
@@ -60,7 +60,7 @@
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="preview<%= idx %>Label">Preview for <%= pdf.name %></h5>
+                                    <h5 class="modal-title" id="preview<%= idx %>Label">Preview untuk <%= pdf.name %></h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                                 </div>
 
@@ -69,8 +69,8 @@
                                 </div>
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Close</button>
-                                    <a href="<%= pdf.url %>" class="btn btn-success text-decoration-none" download title="Download">Download</a>
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Tutup</button>
+                                    <a href="<%= pdf.url %>" class="btn btn-success text-decoration-none" download title="Download">Unduh</a>
                                 </div>
                             </div>
                         </div>
@@ -81,7 +81,7 @@
                     <% if (loggedInUser) { %>
                     <div class="text-center">
                         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sign<%= idx %>" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">
-                            <%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>
+                            <%= pdf.isHashed ? 'Buat Ulang' : 'Buat' %>
                         </button>
                     </div>
 
@@ -89,7 +89,7 @@
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="sign<%= idx %>Label">Sign <%= pdf.name %></h5>
+                                    <h5 class="modal-title" id="sign<%= idx %>Label">Buat Tanda Tangan untuk <%= pdf.name %></h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
                                 </div>
 
@@ -97,15 +97,15 @@
                                     <input type="hidden" name="signed_pdf" value="<%= pdf.name %>">
 
                                     <div class="p-2 d-flex flex-column sign-input-group">
-                                        <label for="public_key<%= pdf.name %>">Public Key</label>
+                                        <label for="public_key<%= pdf.name %>">Kunci Publik</label>
                                         <input type="text" class="form-control" name="public_key" id="public_key<%= pdf.name %>" minlength="1" maxlength="32" required>
-                                        <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
+                                        <p class="text-small text-secondary">Catatan: Kunci publik harus memiliki panjang 1-32 karakter.</p>
                                     </div>
 
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Close</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Tutup</button>
                                         <button type="submit" class="btn btn-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">
-                                            <span><%= pdf.isHashed ? 'Re-Sign' : 'Sign' %></span>
+                                            <span><%= pdf.isHashed ? 'Buat Ulang' : 'Buat' %></span>
                                         </button>
                                     </div>
                                 </form>
@@ -114,7 +114,7 @@
                     </div>
                     <% } else { %>
                     <div class="text-center">
-                        <a href="/login" class="btn btn-outline-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>"><%= pdf.isHashed ? 'Re-Sign' : 'Sign' %></a>
+                        <a href="/login" class="btn btn-outline-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>"><%= pdf.isHashed ? 'Buat Ulang' : 'Buat' %></a>
                     </div>
                     <% } %>
                 </td>
@@ -125,12 +125,12 @@
                     <form action="/delete?_method=DELETE" method="POST">
                         <input type="hidden" name="deleted_pdf" value="<%= pdf.name %>">
                         <button type="submit" class="btn btn-outline-danger" title="Delete">
-                            <span>Delete</span>
+                            <span>Hapus</span>
                         </button>
                     </form>
                     <% } else { %>
                     <div class="text-center">
-                        <a href="/login" class="btn btn-outline-danger" title="Delete">Delete</a>
+                        <a href="/login" class="btn btn-outline-danger" title="Delete">Hapus</a>
                     </div>
                     <% } %>
                 </td>
@@ -143,14 +143,14 @@
 <% } %>
 
 <div>
-    <h4 class="text-center">Compare PDF Hashes</h4>
-    <p class="text-small text-center text-secondary">*Need at least 1 hashed PDFs to compare.</p>
+    <h4 class="text-center">Bandingkan PDF yang di hash</h4>
+    <p class="text-small text-center text-secondary">*Dibutuhkan setidaknya 1 PDF yang di hash untuk melakukan perbandingan.</p>
     <form action="/compare-hash" method="POST" class="d-flex flex-column compare-pdf-form" enctype="multipart/form-data">
         <div class="d-flex sign-input-group">
             <div>
-                <label for="hashed_pdf">Hashed PDF</label>
+                <label for="hashed_pdf">PDF yang di hash</label>
                 <select class="form-select" name="hashed_pdf" id="hashed_pdf" title="Hashed PDF" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
-                    <option selected disabled>No PDF Selected</option>
+                    <option selected disabled>Tidak ada PDF yang dipilih</option>
                     <% pdfs.forEach(pdf => { %>
                     <% if (pdf.isHashed) { %>
                     <option value="<%= pdf.name %>"><%= pdf.name %></option>
@@ -160,26 +160,26 @@
             </div>
 
             <div>
-                <label for="normal_pdf">Normal PDF</label>
+                <label for="normal_pdf">PDF Normal</label>
                 <input type="file" class="form-control" name="normal_pdf" id="normal_pdf" accept=".pdf" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
             </div>
         </div>
 
         <div class="d-flex justify-content-center">
             <div>
-                <label for="public_key">Public Key</label>
+                <label for="public_key">Kunci Publik</label>
                 <input type="text" class="form-control" name="public_key" id="public_key" minlength="1" maxlength="32" value="" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 ? 'disabled' : 'readonly' %>>
-                <p class="text-small text-secondary">Note: Public Key must be 1-32 characters long.</p>
+                <p class="text-small text-secondary">Catatan: Kunci publik harus memiliki panjang 1-32 karakter.</p>
             </div>
         </div>
 
         <div class="text-center">
             <% if (loggedInUser) { %>
             <button class="btn btn-outline-info" type="submit" <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %> title="Compare">
-                <span>Compare</span>
+                <span>Bandingkan</span>
             </button>
             <% } else { %>
-            <a href="/login" class="btn btn-outline-info" <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %> title="Compare">Compare</a>
+            <a href="/login" class="btn btn-outline-info" <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %> title="Compare">Bandingkan</a>
             <% } %>
         </div>
     </form>

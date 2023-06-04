@@ -14,7 +14,7 @@ const initializePassport = () => {
             async (username, password, done) => {
                 try {
                     const user = await User.findByUsername(username);
-                    if (!user) return done(null, false, { param: 'username', message: 'Username or Password is incorrect' });
+                    if (!user) return done(null, false, { param: 'username', message: 'Username atau password salah' });
 
                     const passwordBuffer = Buffer.from(password);
                     const publicKey = username.padEnd(32, ' ');
@@ -22,10 +22,10 @@ const initializePassport = () => {
                     const hashedPassword = new BLAKE2s(publicKey.length, keyBuffer).update(passwordBuffer).hexDigest();
                     const checkPassword = hashedPassword === user.password;
 
-                    if (!checkPassword) return done(null, false, { param: 'password', message: 'Username or Password is incorrect' });
-                    return done(null, user, { message: 'Logged in Successfully' });
+                    if (!checkPassword) return done(null, false, { param: 'password', message: 'Username atau password salah' });
+                    return done(null, user, { message: 'Anda berhasil masuk' });
                 } catch (err) {
-                    return done(err, false, { param: 'error', message: 'Error while trying to log in' });
+                    return done(err, false, { param: 'error', message: 'Terjadi kesalahan' });
                 }
             }
         )

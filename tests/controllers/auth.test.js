@@ -30,7 +30,7 @@ describe('getRegister controller', () => {
         authController.getRegister(req, res);
 
         expect(res.render).toHaveBeenCalledWith('register', {
-            title: 'Register | PDF Digital Signature',
+            title: 'Daftar | PDF Digital Signature',
             activeNav: 'register',
             loggedInUser: req.user || null,
             flash: {
@@ -49,7 +49,7 @@ describe('getLogin controller', () => {
         authController.getLogin(req, res);
 
         expect(res.render).toHaveBeenCalledWith('login', {
-            title: 'Login | PDF Digital Signature',
+            title: 'Masuk | PDF Digital Signature',
             activeNav: 'login',
             loggedInUser: req.user || null,
             flash: {
@@ -92,7 +92,7 @@ describe('postRegister controller', () => {
             password: 'test'
         });
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-        expect(req.flash).toHaveBeenCalledWith('message', 'You have been registered successfully');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Akun anda berhasil terdaftar');
         expect(res.redirect).toHaveBeenCalledWith('/login');
     });
 
@@ -136,7 +136,7 @@ describe('postRegister controller', () => {
         await authController.postRegister(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-        expect(req.flash).toHaveBeenCalledWith('message', 'Password does not match');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Password tidak cocok');
         expect(res.redirect).toHaveBeenCalledWith('/register');
     });
 });
@@ -161,20 +161,20 @@ describe('postLogin', () => {
         authController.postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-        expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
         expect(res.redirect).toHaveBeenCalledWith('/login');
     });
 
     describe('user not found', () => {
         test('should redirect to /login and give flash error message if user not found (error message available)', () => {
             passport.authenticate.mockImplementationOnce((strategy, callback) => (req, res) => {
-                callback(null, false, { param: 'username', message: 'Username or Password is incorrect' });
+                callback(null, false, { param: 'username', message: 'Username atau password salah' });
             });
 
             authController.postLogin(req, res);
 
             expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-            expect(req.flash).toHaveBeenCalledWith('message', 'Username or Password is incorrect');
+            expect(req.flash).toHaveBeenCalledWith('message', 'Username atau password salah');
             expect(res.redirect).toHaveBeenCalledWith('/login');
         });
 
@@ -186,7 +186,7 @@ describe('postLogin', () => {
             authController.postLogin(req, res);
 
             expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-            expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+            expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
             expect(res.redirect).toHaveBeenCalledWith('/login');
         });
     });
@@ -200,7 +200,7 @@ describe('postLogin', () => {
                     username: 'test',
                     password: 'test'
                 },
-                { message: 'Logged in Successfully' }
+                { message: 'Anda berhasil masuk' }
             );
         });
         req.login.mockImplementationOnce((user, callback) => {
@@ -210,7 +210,7 @@ describe('postLogin', () => {
         authController.postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-        expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
         expect(res.redirect).toHaveBeenCalledWith('/login');
     });
 
@@ -223,7 +223,7 @@ describe('postLogin', () => {
                     username: 'test',
                     password: 'test'
                 },
-                { message: 'Logged in Successfully' }
+                { message: 'Anda berhasil masuk' }
             );
         });
         req.login.mockImplementationOnce((user, callback) => callback(null));
@@ -248,7 +248,7 @@ describe('postLogin', () => {
                     username: 'test',
                     password: 'test'
                 },
-                { message: 'Logged in Successfully' }
+                { message: 'Anda berhasil masuk' }
             );
         });
         req.login.mockImplementationOnce((user, callback) => callback(null));
@@ -260,7 +260,7 @@ describe('postLogin', () => {
         authController.postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-        expect(req.flash).toHaveBeenCalledWith('message', 'You have been logged in successfully');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Anda berhasil masuk');
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 });
@@ -277,14 +277,14 @@ describe('postLogout controller', () => {
 
         expect(req.logout).toHaveBeenCalled();
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-        expect(req.flash).toHaveBeenCalledWith('message', 'You have been logged out successfully');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Anda berhasil keluar');
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
     test('should redirect to / and give flash error message if error occurs', () => {
         const req = mockRequest();
         const res = mockResponse();
-        const error = new Error('An error occurred');
+        const error = new Error('Terjadi kesalahan');
 
         req.logout.mockImplementationOnce(callback => callback(error));
 
@@ -292,7 +292,7 @@ describe('postLogout controller', () => {
 
         expect(req.logout).toHaveBeenCalled();
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-        expect(req.flash).toHaveBeenCalledWith('message', 'Something went wrong');
+        expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 });

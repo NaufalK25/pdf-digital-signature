@@ -30,13 +30,13 @@ class PDFController {
 
         if (!publicKey) {
             req.flash('type', 'danger');
-            req.flash('message', 'Please enter a public key');
+            req.flash('message', 'Kunci publik tidak boleh kosong');
             return res.redirect('/');
         }
 
         if (publicKey.length <= 0 || publicKey.length > 32) {
             req.flash('type', 'danger');
-            req.flash('message', 'Public Key must be 1-32 characters long');
+            req.flash('message', 'Panjang kunci publik harus 1-32 karakter');
             return res.redirect('/');
         }
 
@@ -44,7 +44,7 @@ class PDFController {
         await new PDF(path.join(uploadsDir, pdf)).sign(req, privateKey, publicKey);
 
         req.flash('type', 'success');
-        req.flash('message', `File ${pdf} has been signed`);
+        req.flash('message', `File ${pdf} berhasil ditandatangani`);
         res.redirect('/');
     }
 
@@ -55,25 +55,25 @@ class PDFController {
 
         if (!hashedPDF) {
             req.flash('type', 'danger');
-            req.flash('message', 'Please select a hashed PDF file');
+            req.flash('message', 'PDF yang di hash tidak boleh kosong');
             return res.redirect('/');
         }
 
         if (!normalPDF) {
             req.flash('type', 'danger');
-            req.flash('message', 'Please upload a normal PDF file');
+            req.flash('message', 'PDF normal tidak boleh kosong');
             return res.redirect('/');
         }
 
         if (!publicKey) {
             req.flash('type', 'danger');
-            req.flash('message', 'Please enter a public key');
+            req.flash('message', 'Kunci publik tidak boleh kosong');
             return res.redirect('/');
         }
 
         if (publicKey.length <= 0 || publicKey.length > 32) {
             req.flash('type', 'danger');
-            req.flash('message', 'Public Key must be 1-32 characters long');
+            req.flash('message', 'Panjang kunci publik harus 1-32 karakter');
             return res.redirect('/');
         }
 
@@ -83,7 +83,7 @@ class PDFController {
         const isSame = checksumHashedPDF === checksumNormalPDF;
 
         req.flash('type', isSame ? 'success' : 'danger');
-        req.flash('message', `${hashedPDF} and ${normalPDF.filename} are ${isSame ? '' : 'not '}the same file`);
+        req.flash('message', `${hashedPDF} dan ${normalPDF.filename} adalah file yang ${isSame ? 'sama' : 'berbeda'}`);
 
         fs.unlinkSync(normalPDF.path);
 
@@ -93,7 +93,7 @@ class PDFController {
     async uploadPDF(req, res) {
         if (req.files.length <= 0) {
             req.flash('type', 'danger');
-            req.flash('message', 'Please select one or more files to upload');
+            req.flash('message', 'File tidak boleh kosong');
             return res.redirect('/');
         }
 
@@ -106,7 +106,7 @@ class PDFController {
         }
 
         req.flash('type', 'success');
-        req.flash('message', `Successfully uploaded ${req.files.length} file(s)`);
+        req.flash('message', `Berhasil mengunggah ${req.files.length} file`);
         res.redirect('/');
     }
 
@@ -117,7 +117,7 @@ class PDFController {
         fs.unlinkSync(path.join(uploadsDir, pdf));
 
         req.flash('type', 'success');
-        req.flash('message', `Successfully deleted ${pdf}`);
+        req.flash('message', `Berhasil menghapus ${pdf}`);
         res.redirect('/');
     }
 
@@ -126,7 +126,7 @@ class PDFController {
         const loggedInUserPDFsName = loggedInUserPDFs.map(pdf => pdf.name);
         const uploadsDirContent = fs.readdirSync(uploadsDir);
 
-        await UploadedPDF.deleteByUploaderId(req.user.id);
+        const fileCount = await UploadedPDF.deleteByUploaderId(req.user.id);
         uploadsDirContent
             .filter(file => loggedInUserPDFsName.includes(file))
             .forEach(pdf => {
@@ -134,7 +134,7 @@ class PDFController {
             });
 
         req.flash('type', 'success');
-        req.flash('message', `Successfully deleted ${uploadsDirContent.length - 1} file(s)`);
+        req.flash('message', `Berhasil menghapus ${fileCount} file`);
         res.redirect('/');
     }
 }

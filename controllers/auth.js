@@ -7,7 +7,7 @@ const { textToDec } = require('../utils/converter');
 class AuthController {
     getRegister(req, res) {
         res.render('register', {
-            title: 'Register | PDF Digital Signature',
+            title: 'Daftar | PDF Digital Signature',
             activeNav: 'register',
             loggedInUser: req.user || null,
             flash: {
@@ -19,7 +19,7 @@ class AuthController {
 
     getLogin(req, res) {
         res.render('login', {
-            title: 'Login | PDF Digital Signature',
+            title: 'Masuk | PDF Digital Signature',
             activeNav: 'login',
             loggedInUser: req.user || null,
             flash: {
@@ -40,7 +40,7 @@ class AuthController {
 
         if (req.body.password !== req.body.confirmPassword) {
             req.flash('type', 'danger');
-            req.flash('message', 'Password does not match');
+            req.flash('message', 'Password tidak cocok');
             return res.redirect('/register');
         }
 
@@ -57,7 +57,7 @@ class AuthController {
         });
 
         req.flash('type', 'success');
-        req.flash('message', 'You have been registered successfully');
+        req.flash('message', 'Akun anda berhasil terdaftar');
         res.redirect('/login');
     }
 
@@ -65,20 +65,20 @@ class AuthController {
         passport.authenticate('local', (err, user, info) => {
             if (err) {
                 req.flash('type', 'danger');
-                req.flash('message', 'Something went wrong');
+                req.flash('message', 'Terjadi kesalahan');
                 return res.redirect('/login');
             }
 
             if (!user) {
                 req.flash('type', 'danger');
-                req.flash('message', info?.message || 'Something went wrong');
+                req.flash('message', info?.message || 'Terjadi kesalahan');
                 return res.redirect('/login');
             }
 
             req.login(user, err => {
                 if (err) {
                     req.flash('type', 'danger');
-                    req.flash('message', 'Something went wrong');
+                    req.flash('message', 'Terjadi kesalahan');
                     return res.redirect('/login');
                 }
 
@@ -91,7 +91,7 @@ class AuthController {
                 }
 
                 req.flash('type', 'success');
-                req.flash('message', 'You have been logged in successfully');
+                req.flash('message', 'Anda berhasil masuk');
                 res.redirect('/');
             });
         })(req, res);
@@ -101,12 +101,12 @@ class AuthController {
         req.logout(err => {
             if (err) {
                 req.flash('type', 'danger');
-                req.flash('message', 'Something went wrong');
+                req.flash('message', 'Terjadi kesalahan');
                 return res.redirect('/');
             }
 
             req.flash('type', 'success');
-            req.flash('message', 'You have been logged out successfully');
+            req.flash('message', 'Anda berhasil keluar');
             res.redirect('/');
         });
     }

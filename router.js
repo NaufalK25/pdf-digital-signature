@@ -29,7 +29,7 @@ router.get('*', (req, res) => {
 });
 router.all('*', (req, res) => {
     req.flash('type', 'danger');
-    req.flash('message', 'Method not allowed');
+    req.flash('message', 'Metode tidak diperbolehkan');
     res.redirect('/');
 });
 

@@ -6,9 +6,6 @@ const { textToDec } = require('./converter');
 const { UploadedPDF } = require('../database/models');
 
 class PDF {
-    static validPDFBuffer = [37, 80, 68, 70, 45, 49, 46];
-    static minPDFBufferLength = 967;
-
     constructor(filePath = '') {
         this.filePath = filePath;
     }

@@ -226,7 +226,7 @@ class AES {
         return plainArr16
             .map(block => {
                 if (block.length % 16 !== 0) {
-                    throw new Error('Plaintext must be a multiple of 16 characters');
+                    throw new Error('Plaintext harus merupakan kelipatan dari 16 karakter');
                 }
 
                 const initialAddRoundKeyResult = this.initialAddRoundKeyRound(block);
@@ -318,7 +318,7 @@ class AES {
         return cipherArr16
             .map(block => {
                 if (block.length % 16 !== 0) {
-                    throw new Error('Ciphertext must be a multiple of 16 characters');
+                    throw new Error('Ciphertext harus merupakan kelipatan dari 16 karakter');
                 }
 
                 const initialInvAddRoundKeyResult = this.initialInvAddRoundKeyRound(block);
