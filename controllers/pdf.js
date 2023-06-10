@@ -24,6 +24,18 @@ class PDFController {
         });
     }
 
+    getAbout(req, res) {
+        res.render('about', {
+            title: 'Tentang | PDF Digital Signature',
+            activeNav: 'about',
+            loggedInUser: req.user || null,
+            flash: {
+                type: req.flash('type') || '',
+                message: req.flash('message') || ''
+            }
+        });
+    }
+
     async signPDF(req, res) {
         const publicKey = req.body.public_key;
         const pdf = req.body.signed_pdf;
@@ -55,7 +67,7 @@ class PDFController {
 
         if (!hashedPDF) {
             req.flash('type', 'danger');
-            req.flash('message', 'PDF yang di hash tidak boleh kosong');
+            req.flash('message', 'PDF hash tidak boleh kosong');
             return res.redirect('/');
         }
 
@@ -83,7 +95,10 @@ class PDFController {
         const isSame = checksumHashedPDF === checksumNormalPDF;
 
         req.flash('type', isSame ? 'success' : 'danger');
-        req.flash('message', `${hashedPDF} dan ${normalPDF.filename} adalah file yang ${isSame ? 'sama' : 'berbeda'}`);
+        req.flash(
+            'message',
+            `${hashedPDF} dan ${normalPDF.filename} adalah file yang ${isSame ? 'sama' : 'berbeda'}<br>PDF hash: ${checksumHashedPDF}<br>PDF normal: ${checksumNormalPDF}`
+        );
 
         fs.unlinkSync(normalPDF.path);
 

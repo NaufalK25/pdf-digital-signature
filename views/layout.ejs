@@ -21,6 +21,10 @@
                 Beranda
             </a>
 
+            <a href="/about" class="nav-icon <%= activeNav === 'about' ? 'nav-active' : '' %>" title="About">
+                Tentang
+            </a>
+
             <% if (!loggedInUser) { %>
             <a href="/register" class="nav-icon <%= activeNav === 'register' ? 'nav-active' : '' %>" title="Register">
                 Daftar
@@ -48,7 +52,7 @@
     <main class="mb-5 container d-flex flex-column justify-content-center align-items-center">
         <% if (flash && flash.type.length > 0) { %>
         <div class="alert alert-<%= flash.type %> alert-dismissible fade show" role="alert">
-            <%= flash.message %>
+            <%- flash.message %>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" title="Close"></button>
         </div>
         <% } %>

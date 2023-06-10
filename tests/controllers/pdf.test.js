@@ -99,6 +99,29 @@ describe('getRoot controller', () => {
     });
 });
 
+test('getAbout controller should render the about page', () => {
+    const req = mockRequest({
+        user: {
+            id: 1,
+            username: 'test',
+            password: 'test'
+        }
+    });
+    const res = mockResponse();
+
+    pdfController.getAbout(req, res);
+
+    expect(res.render).toHaveBeenCalledWith('about', {
+        title: 'Tentang | PDF Digital Signature',
+        activeNav: 'about',
+        loggedInUser: req.user || null,
+        flash: {
+            type: req.flash('type') || '',
+            message: req.flash('message') || ''
+        }
+    });
+});
+
 describe('signPDF controller', () => {
     beforeAll(() => {
         jest.spyOn(PDF.prototype, 'sign').mockImplementation(() => Promise.resolve());
@@ -210,7 +233,7 @@ describe('compareHashPDF controller', () => {
         await pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
-        expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf dan test.pdf adalah file yang sama');
+        expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf dan test.pdf adalah file yang sama<br>PDF hash: signature<br>PDF normal: signature');
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
@@ -238,7 +261,7 @@ describe('compareHashPDF controller', () => {
         await pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-        expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf dan test.pdf adalah file yang berbeda');
+        expect(req.flash).toHaveBeenCalledWith('message', 'test.pdf dan test.pdf adalah file yang berbeda<br>PDF hash: decryptsignature<br>PDF normal: hashsignature');
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 
@@ -260,7 +283,7 @@ describe('compareHashPDF controller', () => {
         pdfController.compareHashPDF(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
-        expect(req.flash).toHaveBeenCalledWith('message', 'PDF yang di hash tidak boleh kosong');
+        expect(req.flash).toHaveBeenCalledWith('message', 'PDF hash tidak boleh kosong');
         expect(res.redirect).toHaveBeenCalledWith('/');
     });
 

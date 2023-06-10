@@ -35,8 +35,8 @@ const countAvalancheEffect = (value1, value2) => {
     return (count / value1.length) * 100;
 };
 
-const value1 = getSignature('test(8).pdf');
-const value2 = getSignature('test(9).pdf');
+const value1 = getSignature('10.pdf');
+const value2 = getSignature('11.pdf');
 console.log(value1);
 console.log(value2);
 console.log(countAvalancheEffect(value1, value2));

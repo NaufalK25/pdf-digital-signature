@@ -14,7 +14,7 @@
     </form>
 </div>
 
-<% if (loggedInUser) { %>
+<!-- <% if (loggedInUser) { %>
 <form action="/delete-all?_method=DELETE" method="POST">
     <button type="submit" class="btn btn-outline-danger" title="Delete All" <%= !pdfs.length > 0 && 'disabled' %>>
         <span>Hapus Semua</span>
@@ -24,7 +24,7 @@
 <div class="text-center">
     <a href="/login" class="btn btn-outline-danger" title="Delete All">Hapus Semua</a>
 </div>
-<% } %>
+<% } %> -->
 
 <% if (pdfs.length > 0) { %>
 <div>
@@ -51,7 +51,7 @@
                     <% } %>
                 </td>
 
-                <td>
+                <!-- <td>
                     <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#preview<%= idx %>" title="Preview">
                         Preview
                     </button>
@@ -75,13 +75,13 @@
                             </div>
                         </div>
                     </div>
-                </td>
+                </td> -->
 
                 <td>
                     <% if (loggedInUser) { %>
                     <div class="text-center">
                         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sign<%= idx %>" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">
-                            <%= pdf.isHashed ? 'Buat Ulang' : 'Buat' %>
+                            Buat
                         </button>
                     </div>
 
@@ -105,7 +105,7 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" title="Close">Tutup</button>
                                         <button type="submit" class="btn btn-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">
-                                            <span><%= pdf.isHashed ? 'Buat Ulang' : 'Buat' %></span>
+                                            <span>Buat</span>
                                         </button>
                                     </div>
                                 </form>
@@ -114,13 +114,13 @@
                     </div>
                     <% } else { %>
                     <div class="text-center">
-                        <a href="/login" class="btn btn-outline-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>"><%= pdf.isHashed ? 'Buat Ulang' : 'Buat' %></a>
+                        <a href="/login" class="btn btn-outline-success" title="<%= pdf.isHashed ? 'Re-Sign' : 'Sign' %>">Buat</a>
                     </div>
                     <% } %>
                 </td>
 
 
-                <td>
+                <!-- <td>
                     <% if (loggedInUser) { %>
                     <form action="/delete?_method=DELETE" method="POST">
                         <input type="hidden" name="deleted_pdf" value="<%= pdf.name %>">
@@ -133,7 +133,7 @@
                         <a href="/login" class="btn btn-outline-danger" title="Delete">Hapus</a>
                     </div>
                     <% } %>
-                </td>
+                </td> -->
 
             </tr>
             <% }) %>
@@ -143,12 +143,12 @@
 <% } %>
 
 <div>
-    <h4 class="text-center">Bandingkan PDF yang di hash</h4>
-    <p class="text-small text-center text-secondary">*Dibutuhkan setidaknya 1 PDF yang di hash untuk melakukan perbandingan.</p>
+    <h4 class="text-center">Bandingkan PDF hash</h4>
+    <p class="text-small text-center text-secondary">*Dibutuhkan setidaknya 1 PDF hash untuk melakukan perbandingan.</p>
     <form action="/compare-hash" method="POST" class="d-flex flex-column compare-pdf-form" enctype="multipart/form-data">
         <div class="d-flex sign-input-group">
             <div>
-                <label for="hashed_pdf">PDF yang di hash</label>
+                <label for="hashed_pdf">PDF Hash</label>
                 <select class="form-select" name="hashed_pdf" id="hashed_pdf" title="Hashed PDF" required <%= pdfs.filter(pdf => pdf.isHashed).length < 1 && 'disabled' %>>
                     <option selected disabled>Tidak ada PDF yang dipilih</option>
                     <% pdfs.forEach(pdf => { %>

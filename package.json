@@ -6,7 +6,8 @@
     "scripts": {
         "start": "node index.js",
         "dev": "npx nodemon index.js -e js,ejs,css",
-        "test": "npx jest --passWithNoTests"
+        "test": "npx jest --passWithNoTests",
+        "ae": "node avalancheeffect.js"
     },
     "keywords": [],
     "author": "",

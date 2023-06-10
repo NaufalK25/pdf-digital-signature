@@ -22,6 +22,7 @@ router.delete('/delete', pdfController.deletePDF);
 router.delete('/delete-all', pdfController.deleteAllPDF);
 router.post('/sign', publicKeyValidator, pdfController.signPDF);
 router.post('/compare-hash', uploadPDFMiddleware.single('normal_pdf'), publicKeyValidator, pdfController.compareHashPDF);
+router.get('/about', pdfController.getAbout);
 router.get('/', pdfController.getRoot);
 
 router.get('*', (req, res) => {
