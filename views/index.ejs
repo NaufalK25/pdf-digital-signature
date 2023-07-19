@@ -43,7 +43,7 @@
                     <a href="<%= pdf.url %>" target="_blank" rel="noopener noreferrer" title="<%= pdf.name %>"><%= pdf.name %></a>
                     <% if (pdf.isHashed) { %>
                     <div>
-                        <span class="text-small">Checksum: <%= pdf.checksum || '-' %></span>
+                        <span class="text-small">Tanda Tangan Digital: <%= pdf.checksum || '-' %></span>
                     </div>
                     <div>
                         <span class="text-small">Kunci Publik: <%= pdf.publicKey || '-' %></span>

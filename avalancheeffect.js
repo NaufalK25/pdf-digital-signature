@@ -35,14 +35,21 @@ const countAvalancheEffect = (value1, value2) => {
     return (count / value1.length) * 100;
 };
 
-const value1 = getSignature('10.pdf');
-const value2 = getSignature('11.pdf');
-console.log(value1);
-console.log(value2);
-console.log(countAvalancheEffect(value1, value2));
+const file1 = process.argv[2];
+const file2 = process.argv[3];
 
-const value3 = getEncryptedSignature(value1);
-const value4 = getEncryptedSignature(value2);
-console.log(value3);
-console.log(value4);
-console.log(countAvalancheEffect(value3, value4));
+if (file1 && file2) {
+    const value1 = getSignature(`${file1}.pdf`);
+    const value2 = getSignature(`${file2}.pdf`);
+    console.log(value1);
+    console.log(value2);
+    console.log(countAvalancheEffect(value1, value2));
+
+    const value3 = getEncryptedSignature(value1);
+    const value4 = getEncryptedSignature(value2);
+    console.log(value3);
+    console.log(value4);
+    console.log(countAvalancheEffect(value3, value4));
+} else {
+    console.log('Tolong masukkan nama file yang ingin dihitung Avalanche Effectnya');
+}

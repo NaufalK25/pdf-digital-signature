@@ -1,10 +1,9 @@
 const passport = require('passport');
 const { validationResult } = require('express-validator');
-const AuthController = require('../../controllers/auth');
+const { getLogin, getRegister, postLogin, postLogout, postRegister } = require('../../controllers/auth');
 const BLAKE2s = require('../../utils/BLAKE2s');
 const { User } = require('../../database/models');
 
-const authController = new AuthController();
 const mockRequest = ({ user, body } = {}) => ({
     login: jest.fn(),
     logout: jest.fn(),
@@ -27,7 +26,7 @@ describe('getRegister controller', () => {
         const req = mockRequest();
         const res = mockResponse();
 
-        authController.getRegister(req, res);
+        getRegister(req, res);
 
         expect(res.render).toHaveBeenCalledWith('register', {
             title: 'Daftar | PDF Digital Signature',
@@ -46,7 +45,7 @@ describe('getLogin controller', () => {
         const req = mockRequest();
         const res = mockResponse();
 
-        authController.getLogin(req, res);
+        getLogin(req, res);
 
         expect(res.render).toHaveBeenCalledWith('login', {
             title: 'Masuk | PDF Digital Signature',
@@ -85,7 +84,7 @@ describe('postRegister controller', () => {
         });
         const res = mockResponse();
 
-        await authController.postRegister(req, res);
+        await postRegister(req, res);
 
         expect(User.create).toHaveBeenCalledWith({
             username: req.body.username,
@@ -111,7 +110,7 @@ describe('postRegister controller', () => {
         });
         const res = mockResponse();
 
-        await authController.postRegister(req, res);
+        await postRegister(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'test');
@@ -133,7 +132,7 @@ describe('postRegister controller', () => {
         });
         const res = mockResponse();
 
-        await authController.postRegister(req, res);
+        await postRegister(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Password tidak cocok');
@@ -158,7 +157,7 @@ describe('postLogin', () => {
             callback(new Error('Authentication error'));
         });
 
-        authController.postLogin(req, res);
+        postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
@@ -171,7 +170,7 @@ describe('postLogin', () => {
                 callback(null, false, { param: 'username', message: 'Username atau password salah' });
             });
 
-            authController.postLogin(req, res);
+            postLogin(req, res);
 
             expect(req.flash).toHaveBeenCalledWith('type', 'danger');
             expect(req.flash).toHaveBeenCalledWith('message', 'Username atau password salah');
@@ -183,7 +182,7 @@ describe('postLogin', () => {
                 callback(null, false, {});
             });
 
-            authController.postLogin(req, res);
+            postLogin(req, res);
 
             expect(req.flash).toHaveBeenCalledWith('type', 'danger');
             expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
@@ -207,7 +206,7 @@ describe('postLogin', () => {
             callback(new Error('Login error'));
         });
 
-        authController.postLogin(req, res);
+        postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Terjadi kesalahan');
@@ -232,7 +231,7 @@ describe('postLogin', () => {
             array: jest.fn(() => [{ msg: 'Validation error' }])
         });
 
-        authController.postLogin(req, res);
+        postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
         expect(req.flash).toHaveBeenCalledWith('message', 'Validation error');
@@ -257,7 +256,7 @@ describe('postLogin', () => {
             array: jest.fn(() => [])
         });
 
-        authController.postLogin(req, res);
+        postLogin(req, res);
 
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
         expect(req.flash).toHaveBeenCalledWith('message', 'Anda berhasil masuk');
@@ -273,7 +272,7 @@ describe('postLogout controller', () => {
 
         req.logout.mockImplementationOnce(callback => callback(error));
 
-        authController.postLogout(req, res);
+        postLogout(req, res);
 
         expect(req.logout).toHaveBeenCalled();
         expect(req.flash).toHaveBeenCalledWith('type', 'success');
@@ -288,7 +287,7 @@ describe('postLogout controller', () => {
 
         req.logout.mockImplementationOnce(callback => callback(error));
 
-        authController.postLogout(req, res);
+        postLogout(req, res);
 
         expect(req.logout).toHaveBeenCalled();
         expect(req.flash).toHaveBeenCalledWith('type', 'danger');
